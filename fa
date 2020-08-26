@@ -2,4 +2,4 @@ backends/xxxx/ : project implementing a bges backend using xxxx
 common/common/ : headers shared between bges and bges backends
 sources        : sources for the bges project
 includes/      : headers files to be included by bges end users
-tests/         : unit tests for bges
+tests/xxxx/    : unit tests for bges, testing against backend xxxx
