@@ -140,6 +140,9 @@ typedef enum {
 	BGES_ENUMNAME(F10),
 	BGES_ENUMNAME(F11),
 	BGES_ENUMNAME(F12),
+	BGES_ENUMNAME(F13),
+	BGES_ENUMNAME(F14),
+	BGES_ENUMNAME(F15),
 	BGES_ENUMNAME(SPACE),
 	BGES_ENUMNAME(ENTER),
 	BGES_ENUMNAME(DEL),
@@ -150,9 +153,18 @@ typedef enum {
 	BGES_ENUMNAME(RIGHT),
 	BGES_ENUMNAME(PAGE_UP),
 	BGES_ENUMNAME(PAGE_DOWN),
-	BGES_ENUMNAME(PAGE_TAB),
+	BGES_ENUMNAME(TAB),
 	BGES_ENUMNAME(END),
+	BGES_ENUMNAME(ESCAPE),
 	BGES_ENUMNAME(INSERT),
+	BGES_ENUMNAME(PAUSE),
+	BGES_ENUMNAME(PLAYPAUSE),
+	BGES_ENUMNAME(PLAY),
+	BGES_ENUMNAME(RCTRL),
+	BGES_ENUMNAME(LCTRL),
+	BGES_ENUMNAME(RCAPS),
+	BGES_ENUMNAME(LCAPS),
+	BGES_ENUMNAME(META),
 
 	BGES_ENUMNAME(UNLISTED_KEY_CODE),
 
@@ -178,9 +190,8 @@ typedef enum {
 BGES_END_NAMESPACE
 
 typedef struct bges_event {
+    std::uint8_t type; // refers to the enum bges_event_type/bges_ffi::event_type::event_type
 	union {
-		std::uint8_t type; // refers to the enum bges_event_type/bges_ffi::event_type::event_type
-
 		struct {
 			std::uint16_t hw_key_code; // "hardware" code (layout independent)
 			std::uint16_t key; // refers to the enum bges_key/bges_ffi::key::key
@@ -201,11 +212,12 @@ typedef struct bges_event {
 			std::uint8_t delta;
 			std::uint8_t wheel_id;
 			bool horizontal_scroll; // or vertical
-			bool updward; // or downward
+			bool upwards; // or downwards (horizontal : leftwards or rightwards)
+			struct bges_point pos;
 		} mouse_scroll;
 
 		struct {
-			struct bges_point delta; // new_pos - old_pos = delta
+			struct bges_point pos;
 		} mouse_move;
 
 		struct bges_size window_size;

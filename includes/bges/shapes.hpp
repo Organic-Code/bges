@@ -3,19 +3,30 @@
 
 #include <bges/colors.hpp>
 #include <bges/geometry.hpp>
+#include <bges/base_classes/renderable.hpp>
 
 namespace bges {
-struct Rectangle: PointI, SizeU {
-	Color fill_color{};
+
+// TODO
+class BGES_CPPEXPORT Rectangle : public Renderable {
+public:
+	GeoRectangle rect{};
 	Color outline_color{};
-	unsigned int outline_thickness{};
+	Color fill_color{};
+
+protected:
+    void vrender(Scene&) noexcept override;
 };
 
-struct Line {
+class BGES_CPPEXPORT Line : public Renderable {
+public:
+	GeoLine line{};
 	Color color{};
-	PointI min_pos{};
-	PointI max_pos{};
+
+protected:
+    void vrender(Scene&) noexcept override;
 };
+
 } // namespace bges
 
 #endif //BGES_SHAPES_HPP

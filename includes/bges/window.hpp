@@ -1,58 +1,87 @@
 #ifndef BGES_WINDOW_HPP
 #define BGES_WINDOW_HPP
 
-#include <memory>
+#include <array>
 #include <functional>
+#include <memory>
 
 #include <bges/details/export.hpp>
+#include <bges/base_classes/event_publishers.hpp>
+#include <../sources/backend_context.hpp>
 
 namespace bges {
 
 struct Rectangle;
 struct Line;
-struct Viewport;
+class Viewport;
+class Scene;
 
 namespace backend {
 	struct Context;
 }
 
-class Window {
+class BGES_CPPEXPORT Window: public event_publisher::MouseEvents<Window &>,
+              public event_publisher::KeyboardEvents<Window &>,
+              public event_publisher::WindowEvents<Window &> {
 public:
 	// does not open the window. call "open" to open
-	BGES_CPPEXPORT Window() noexcept;
+	Window();
 
-	BGES_CPPEXPORT Window(Window &&);
-	BGES_CPPEXPORT Window &operator=(Window &&);
+	Window(Window &&) noexcept = default;
+	Window &operator=(Window &&) noexcept = default;
 
 	Window(const Window &) = delete;
 	Window &operator=(const Window &) = delete;
-	BGES_CPPEXPORT ~Window();
+	~Window();
 
 	// return false on failure
-	BGES_CPPEXPORT [[nodiscard]] bool open(const char *name) noexcept;
-	BGES_CPPEXPORT [[nodiscard]] bool open(const char *name, unsigned int width, unsigned int height) noexcept;
+	bool open(const char *name) noexcept;
+	bool open(const char *name, unsigned int width, unsigned int height) noexcept;
 
-	BGES_CPPEXPORT void set_viewport(const Viewport& vp);
-	BGES_CPPEXPORT void set_size(unsigned int width, unsigned int height) noexcept;
-	BGES_CPPEXPORT void close() noexcept;
+	void set_viewport(const Viewport &vp);
+	void set_size(unsigned int width, unsigned int height) noexcept;
+	void close() noexcept;
 
-	BGES_CPPEXPORT [[nodiscard]] bool is_open() const noexcept;
-
-	BGES_CPPEXPORT void draw(const Rectangle &rect) noexcept;
-	BGES_CPPEXPORT void draw(const Line &line) noexcept;
+	[[nodiscard]] bool is_open() const noexcept;
 
 	// using scenes and not rectangle.
 
-	BGES_CPPEXPORT void clear() noexcept;
-	BGES_CPPEXPORT void render() noexcept;
+	void clear() noexcept;
+	void render() noexcept;
 
-	// the caller shall return true to close the window
-	BGES_CPPEXPORT void on_close_request(std::function<bool(Window&)> on_close_listener);
+	[[nodiscard]] std::vector<Scene>::size_type scene_count() const noexcept;
+	Scene &get_scene(std::vector<Scene>::size_type idx) noexcept;
+	[[nodiscard]] const Scene &get_scene(std::vector<Scene>::size_type idx) const noexcept;
+	void add_scene(std::shared_ptr<Scene> scene);
+	void show_scene(std::vector<Scene>::size_type idx) noexcept;
+
+	template <unsigned int N>
+	void show_scenes(const std::array<std::vector<Scene>::size_type, N>& scenes) noexcept {
+		hide_all_scenes();
+		for (auto idx : scenes) {
+			unhide_scene(idx);
+		}
+	}
+
+
+
+	struct Attorney {
+		static bges::backend::Context& get_context(Window& win) noexcept {
+			assert(win.m_ctx != nullptr);
+			return *win.m_ctx;
+		}
+	};
 
 private:
-	std::unique_ptr<backend::Context> m_ctx;
+	void unhide_scene(std::vector<Scene>::size_type idx) noexcept;
+	void hide_all_scenes() noexcept;
 
-	std::vector<std::function<bool(Window&)>> m_on_close_request;
+	// Come on, why do I need that struct ? MSVC you’re killing me u.u
+    struct backend_ctx_ptr_t : std::unique_ptr<bges::backend::Context> {
+		~backend_ctx_ptr_t();
+	} m_ctx{};
+
+	std::vector<std::shared_ptr<Scene>> m_scenes{};
 };
 } // namespace bges
 

@@ -53,11 +53,11 @@ CheckOptions:
   - key:   readability-function-size.VariableThreshold
     value: '10'
   - key:   readability-identifier-naming.AbstractClassCase
-    value: 'lower_case'
+    value: 'CamelCase'
   - key:   readability-identifier-naming.AbstractClassSuffix
-    value: '_interface'
+    value: 'able'
   - key:   readability-identifier-naming.ClassCase
-    value: 'lower_case'
+    value: 'CamelCase'
   - key:   readability-identifier-naming.ClassConstantCase
     value: 'UPPER_CASE'
   - key:   readability-identifier-naming.ClassMemberCase
@@ -139,7 +139,7 @@ CheckOptions:
   - key:   readability-identifier-naming.StaticVariableCase
     value: 'lower_case'
   - key:   readability-identifier-naming.StructCase
-    value: 'lower_case'
+    value: 'CamelCase'
   - key:   readability-identifier-naming.TemplateParameterCase
     value: 'CamelCase'
   - key:   readability-identifier-naming.TemplateTemplateParameterCase
@@ -156,14 +156,12 @@ CheckOptions:
     value: 'lower_case'
   - key:   readability-identifier-naming.VirtualMethodCase
     value: 'lower_case'
-  - key:   readability-identifier-naming.VirtualMethodPrefix
-    value: 'v'
   - key:   readability-inconsistent-declaration-parameter-name.Strict
     value: '1'
   - key:   readability-magic-numbers.IgnoredIntegerValues
     value: '-1;0;1;2;3;4'
   - key:   readability-magic-numbers.IgnoredFloatingPointValues
-    value: '-1.0, 0.0, 1.0, 0.5'
+    value: '-1.0, 0.0, 1.0, 0.5,-2.0,2.0'
   - key:   readability-redundant-member-init.IgnoreBaseInCopyConstructors
     value: '1'
   - key:   readability-simplify-boolean-expr.ChainedConditionalReturn
