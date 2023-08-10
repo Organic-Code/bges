@@ -4,7 +4,7 @@
 #if defined OS_WINDOWS
 #	define BGES_CPPEXPORT __declspec(dllexport)
 #elif defined OS_LINUX
-#	define BGES_CPPEXPORT __attribute__((visibility("default")))
+#	define  BGES_CPPEXPORT __attribute__((visibility("default")))
 #else
 #	define BGES_CPPEXPORT
 #endif

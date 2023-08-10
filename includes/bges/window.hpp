@@ -72,6 +72,7 @@ public:
 		}
 	};
 
+
 private:
 	void unhide_scene(std::vector<Scene>::size_type idx) noexcept;
 	void hide_all_scenes() noexcept;
@@ -82,6 +83,7 @@ private:
 	} m_ctx{};
 
 	std::vector<std::shared_ptr<Scene>> m_scenes{};
+
 };
 } // namespace bges
 

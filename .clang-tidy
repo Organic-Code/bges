@@ -1,4 +1,4 @@
-Checks: '*,-abseil-*,-boost-*,-darwin-*,-fuchsia-*,-google-objc-*,-google-uild-using-namespace,-google-upgrade-googletest-case,-mpi-*,-objc-*,-openmp-*,-cert-err58-cpp,-clang-analyzer-osx.*,-clang-analyzer-optin.osx.*,-modernize-use-trailing-return-type,-modernize-use-transparent-functors,-readability-uppercase-literal-suffix,-cppcoreguidelines-pro-bounds-constant-array-index,-cert-dcl21-cpp,-misc-non-private-member-variables-in-classes,-google-runtime-references,-hicpp-uppercase-literal-suffix,-cppcoreguidelines-non-private-member-variables-in-classes'
+Checks: '*,-altera-*,-abseil-*,-boost-*,-darwin-*,-fuchsia-*,-google-objc-*,-google-uild-using-namespace,-google-upgrade-googletest-case,-mpi-*,-objc-*,-openmp-*,-cert-err58-cpp,-clang-analyzer-osx.*,-clang-analyzer-optin.osx.*,-modernize-use-trailing-return-type,-modernize-use-transparent-functors,-readability-uppercase-literal-suffix,-cppcoreguidelines-pro-bounds-constant-array-index,-cert-dcl21-cpp,-misc-non-private-member-variables-in-classes,-google-runtime-references,-hicpp-uppercase-literal-suffix,-cppcoreguidelines-non-private-member-variables-in-classes,-llvmlibc-callee-namespace,-llvmlibc-implementation-in-namespace,-altera-struct-pack-align,-cppcoreguidelines-pro-type-union-access,-llvmlibc-*,,-readability-identifier-length'
 CheckOptions:
   - key:   bugprone-assert-side-effect.CheckFunctionCalls
     value: 'true'
@@ -81,9 +81,9 @@ CheckOptions:
   - key:   readability-identifier-naming.ConstexprVariableCase
     value: 'lower_case'
   - key:   readability-identifier-naming.EnumCase
-    value: 'lower_case'
+    value: 'CamelCase'
   - key:   readability-identifier-naming.EnumConstantCase
-    value: 'UPPER_CASE'
+    value: 'lower_case'
   - key:   readability-identifier-naming.FunctionCase
     value: 'lower_case'
   - key:   readability-identifier-naming.GlobalConstantCase
@@ -99,7 +99,7 @@ CheckOptions:
   - key:   readability-identifier-naming.GlobalVariableCase
     value: 'aNy_CaSe'
   - key:   readability-identifier-naming.GlobalVariablePrefix
-    value: 'glob'
+    value: 'glob_'
   - key:   readability-identifier-naming.LocalPointerCase
     value: 'lower_case'
   - key:   readability-identifier-naming.LocalVariableCase

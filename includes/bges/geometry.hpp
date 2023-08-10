@@ -27,8 +27,8 @@ struct Point {
 	}
 };
 
-using PointF = Point<float>;
-using PointI = Point<int>;
+using PointF = Point<float>; // NOLINT(readability-identifier-naming)
+using PointI = Point<int>; // NOLINT(readability-identifier-naming)
 
 
 template <typename T>
@@ -54,8 +54,8 @@ struct Size {
 	}
 };
 
-using SizeF = Size<float>;
-using SizeU = Size<unsigned>;
+using SizeF = Size<float>; // NOLINT(readability-identifier-naming)
+using SizeU = Size<unsigned>; // NOLINT(readability-identifier-naming)
 
 struct GeoRectangle: PointI, SizeU {
     unsigned int outline_thickness{};

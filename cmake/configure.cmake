@@ -12,13 +12,19 @@ function(bges_configure_target target_name)
     set_target_properties(
         ${target_name}
         PROPERTIES
-            CXX_STANDARD 20
+            CXX_STANDARD 17
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
             DEBUG_POSTFIX dbg
     )
 
     target_include_directories(${target_name} PRIVATE common/)
+
+    target_compile_definitions(
+        ${target_name}
+        PRIVATE $<$<CONFIG:Debug>:DEBUG>
+        PRIVATE $<$<CONFIG:Release>:NDEBUG>
+    )
 endfunction()
 
 function(bges_link_threads target_name)

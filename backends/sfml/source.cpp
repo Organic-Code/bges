@@ -1,8 +1,10 @@
-#include <memory>
 #include <array>
+#include <memory>
 
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include "common/exchanged_types.h"
@@ -10,9 +12,9 @@
 
 namespace {
 
-constexpr std::array<std::uint16_t, sf::Keyboard::KeyCount> init_key_mapping() noexcept {
+constexpr std::array<std::uint16_t, sf::Keyboard::KeyCount> init_key_mapping() noexcept { // NOLINT(*-function-size)
 	std::array<std::uint16_t, sf::Keyboard::KeyCount> array{};
-	using namespace bges_ffi::key;
+	using namespace bges_ffi::key; // NOLINT(*-build-using-namespace)
 	array[sf::Keyboard::A]         = A;
 	array[sf::Keyboard::B]         = B;
 	array[sf::Keyboard::C]         = C;
@@ -50,15 +52,15 @@ constexpr std::array<std::uint16_t, sf::Keyboard::KeyCount> init_key_mapping() n
 	array[sf::Keyboard::Num8]      = KB_8;
 	array[sf::Keyboard::Num9]      = KB_9;
 	array[sf::Keyboard::Escape]    = ESCAPE;
-	array[sf::Keyboard::LControl]  = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::LShift]    = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::LAlt]      = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::LSystem]   = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::RControl]  = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::RShift]    = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::RAlt]      = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::RSystem]   = UNLISTED_KEY_CODE;
-	array[sf::Keyboard::Menu]      = UNLISTED_KEY_CODE;
+	array[sf::Keyboard::LControl]  = LCTRL;
+	array[sf::Keyboard::LShift]    = LSHIFT;
+	array[sf::Keyboard::LAlt]      = LALT;
+	array[sf::Keyboard::LSystem]   = LSYSTEM;
+	array[sf::Keyboard::RControl]  = RCTRL;
+	array[sf::Keyboard::RShift]    = RSHIFT;
+	array[sf::Keyboard::RAlt]      = RALT;
+	array[sf::Keyboard::RSystem]   = RSYSTEM;
+	array[sf::Keyboard::Menu]      = MENU;
 	array[sf::Keyboard::LBracket]  = UNLISTED_KEY_CODE;
 	array[sf::Keyboard::RBracket]  = UNLISTED_KEY_CODE;
 	array[sf::Keyboard::Semicolon] = UNLISTED_KEY_CODE;
@@ -122,7 +124,24 @@ constexpr std::array sf2bges_key_code = init_key_mapping();
 struct pdata {
 	sf::RenderWindow window{};
 	sf::Vector2u last_rendered_sz{};
+	sf::Font font{};
 };
+
+std::int32_t x_from_pt(bges_ffi::point ptx) {
+	return ptx.x / ptx.resolution;
+}
+
+std::int32_t y_from_pt(bges_ffi::point ptx) {
+	return ptx.y / ptx.resolution;
+}
+
+float fx_from_pt(bges_ffi::point ptx) {
+	return static_cast<float>(ptx.x) / static_cast<float>(ptx.resolution);
+}
+
+float fy_from_pt(bges_ffi::point ptx) {
+	return static_cast<float>(ptx.y) / static_cast<float>(ptx.resolution);
+}
 
 void fix_viewport_on_win_resize(sf::RenderWindow &window, sf::Vector2u old_size) {
 	sf::Vector2u new_size = window.getSize();
@@ -154,19 +173,19 @@ sf::Color sfcolor(const bges_ffi::color &c) {
 	                 static_cast<sf::Uint8>(c.alpha * 255));
 }
 
-bool open_window(bges_ffi::backend_win_ctx *ctx, const char *window_name) {
-	constexpr unsigned int default_width  = 800;
-	constexpr unsigned int default_height = 600;
+uint8_t open_window(bges_ffi::backend_win_ctx *ctx, const char *window_name) {
+	constexpr unsigned int default_width  = 800; // fixme
+	constexpr unsigned int default_height = 600; // fixme
 
 	pdata &data = *get_pdata(ctx);
 	data.window.create(sf::VideoMode{default_width, default_height}, window_name);
 	if (!data.window.isOpen()) {
 		set_error(ctx, "failed to open window");
-		return false;
+		return 0;
 	}
 
 	data.window.setView(sf::View{{0.f, 0.f, static_cast<float>(default_width), static_cast<float>(default_height)}});
-	return true;
+	return 1;
 }
 
 void set_window_size(bges_ffi::backend_win_ctx *ctx, bges_ffi::size new_size) {
@@ -179,6 +198,22 @@ void set_window_size(bges_ffi::backend_win_ctx *ctx, bges_ffi::size new_size) {
 bges_ffi::bges_size get_window_size(bges_ffi::backend_win_ctx *ctx) {
 	auto sz = get_pdata(ctx)->window.getSize();
 	return {sz.x, sz.y};
+}
+
+void move(bges_ffi::backend_win_ctx *ctx, bges_ffi::point delta) {
+	auto pos = get_pdata(ctx)->window.getPosition();
+	get_pdata(ctx)->window.setPosition({pos.x + x_from_pt(delta), pos.y + y_from_pt(delta)});
+}
+
+void get_position(bges_ffi::backend_win_ctx *ctx, bges_ffi::point *out) {
+	auto pos        = get_pdata(ctx)->window.getPosition();
+	out->x          = pos.x;
+	out->y          = pos.y;
+	out->resolution = 1;
+}
+
+void set_position(bges_ffi::backend_win_ctx *ctx, bges_ffi::point pos) {
+	get_pdata(ctx)->window.setPosition({x_from_pt(pos), y_from_pt(pos)});
 }
 
 void close_window(bges_ffi::backend_win_ctx *ctx) {
@@ -288,23 +323,24 @@ void retrieve_window_events(bges_ffi::backend_win_ctx *ctx, bges_ffi::event_list
 					default:
 						ptr.mouse_button.kind = mouse_button::UNLISTED_BUTTON_CODE;
 				}
-				ptr.mouse_button.pos = {ev.mouseButton.x, ev.mouseButton.y};
+				ptr.mouse_button.pos = {ev.mouseButton.x, ev.mouseButton.y, 1};
 				break;
 
-            case sf::Event::MouseWheelScrolled:
-				ptr.type = event_type::MOUSE_SCROLL;
-				ptr.mouse_scroll.delta = static_cast<std::uint8_t>(std::abs(ev.mouseWheelScroll.delta));
-                ptr.mouse_scroll.wheel_id = 0;
-                ptr.mouse_scroll.horizontal_scroll = ev.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel;
-                ptr.mouse_scroll.upwards = ev.mouseWheelScroll.delta > 0;
-                ptr.mouse_scroll.pos.x = ev.mouseWheelScroll.x;
-                ptr.mouse_scroll.pos.y = ev.mouseWheelScroll.y;
-                break;
-            case sf::Event::MouseMoved:
-				ptr.type = event_type::MOUSE_MOVE;
-				ptr.mouse_move.pos.x = ev.mouseMove.x;
-				ptr.mouse_move.pos.y = ev.mouseMove.y;
-                break;
+			case sf::Event::MouseWheelScrolled:
+				ptr.type                           = event_type::MOUSE_SCROLL;
+				ptr.mouse_scroll.delta             = static_cast<std::uint8_t>(std::abs(ev.mouseWheelScroll.delta));
+				ptr.mouse_scroll.wheel_id          = 0;
+				ptr.mouse_scroll.horizontal_scroll = ev.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel;
+				ptr.mouse_scroll.upwards           = ev.mouseWheelScroll.delta > 0;
+				ptr.mouse_scroll.pos.x             = ev.mouseWheelScroll.x;
+				ptr.mouse_scroll.pos.y             = ev.mouseWheelScroll.y;
+				break;
+			case sf::Event::MouseMoved:
+				ptr.type                      = event_type::MOUSE_MOVE;
+				ptr.mouse_move.pos.x          = ev.mouseMove.x;
+				ptr.mouse_move.pos.y          = ev.mouseMove.y;
+				ptr.mouse_move.pos.resolution = 1;
+				break;
 
 				// unsuported vv
 			case sf::Event::MouseEntered:
@@ -341,14 +377,14 @@ void clear_window(bges_ffi::backend_win_ctx *ctx) {
 }
 
 void draw_line(bges_ffi::backend_win_ctx *ctx, bges_ffi::point begin, bges_ffi::point end, bges_ffi::color color) {
-	sf::Vertex line[] = {{{static_cast<float>(begin.x), static_cast<float>(begin.y)}, sfcolor(color)},
-	                     {{static_cast<float>(end.x), static_cast<float>(end.y)}, sfcolor(color)}};
+	sf::Vertex line[] = {{{fx_from_pt(begin), fy_from_pt(begin)}, sfcolor(color)},
+	                     {{fx_from_pt(end), fy_from_pt(end)}, sfcolor(color)}};
 	get_pdata(ctx)->window.draw(line, std::size(line), sf::Lines);
 }
 
 void draw_rectangle(bges_ffi::backend_win_ctx *ctx, bges_ffi::point pos, bges_ffi::size size, bges_ffi::color color) {
 	sf::RectangleShape rect{};
-	rect.setPosition(pos.x, pos.y);
+	rect.setPosition(fx_from_pt(pos), fy_from_pt(pos));
 	rect.setSize(sf::Vector2f(size.width, size.height));
 	rect.setFillColor(sfcolor(color));
 	get_pdata(ctx)->window.draw(rect);
@@ -357,20 +393,47 @@ void draw_rectangle(bges_ffi::backend_win_ctx *ctx, bges_ffi::point pos, bges_ff
 void draw_outlined_rectangle(bges_ffi::backend_win_ctx *ctx, bges_ffi::point pos, bges_ffi::size size, bges_ffi::color fill_color,
                              uint16_t outline_thickness, bges_ffi::color outline_color) {
 	sf::RectangleShape rect{};
-	rect.setPosition(pos.x, pos.y);
+	rect.setPosition(fx_from_pt(pos), fy_from_pt(pos));
 	rect.setSize(sf::Vector2f(size.width, size.height));
 	rect.setOutlineThickness(outline_thickness);
 	rect.setFillColor(sfcolor(fill_color));
 	rect.setOutlineColor(sfcolor(outline_color));
 	get_pdata(ctx)->window.draw(rect);
 }
+
+void draw_text_line(bges_ffi::bges_backend_win_ctx *ctx, bges_ffi::bges_point coord, const char *text) {
+	// TODO: proper impl
+	sf::Text stext;
+	stext.setString(text);
+	stext.setFont(get_pdata(ctx)->font);
+	stext.setCharacterSize(24);
+	stext.setFillColor(sf::Color::Blue);
+	stext.setPosition(fx_from_pt(coord), fy_from_pt(coord));
+
+	get_pdata(ctx)->window.draw(stext);
+}
+const char *draw_text_lenlim(bges_ffi::bges_backend_win_ctx *ctx, bges_ffi::bges_point coord, const char *text, uint32_t px_len) {
+	// TODO
+	return text;
+}
+uint32_t text_px_size(bges_ffi::bges_backend_win_ctx *ctx, const char *text) {
+	sf::Text stext;
+	stext.setFont(get_pdata(ctx)->font);
+	stext.setCharacterSize(24);
+
+	auto bounds = stext.getLocalBounds();
+	return static_cast<uint32_t>(bounds.getSize().x);
+} // TODO: proper impl
 } // namespace
 
-BGES_PUBLIC_API void bgesbe_init_ctx(bges_ffi::version front_end_version, /* out */ bges_ffi::backend_win_ctx *ctx) {
+BGES_PUBLIC_API void bgesbe_init_ctx(bges_ffi::version /*front_end_version*/, /* out */ bges_ffi::backend_win_ctx *ctx) {
 	ctx->data = new pdata;
 
 	ctx->open                    = &open_window;
 	ctx->resize                  = &set_window_size;
+	ctx->move                    = &move;
+	ctx->get_position            = &get_position;
+	ctx->set_position            = &set_position;
 	ctx->close                   = &close_window;
 	ctx->is_open                 = &is_window_open;
 	ctx->set_viewport            = &set_window_viewport;
@@ -381,9 +444,15 @@ BGES_PUBLIC_API void bgesbe_init_ctx(bges_ffi::version front_end_version, /* out
 	ctx->draw_line               = &draw_line;
 	ctx->draw_rectangle          = &draw_rectangle;
 	ctx->draw_outlined_rectangle = &draw_outlined_rectangle;
+
+	if (get_pdata(ctx)->font.loadFromFile("Helvetica.ttf")) {
+		ctx->draw_text_line   = &draw_text_line;
+		ctx->draw_text_lenlim = &draw_text_lenlim;
+		ctx->text_px_size     = &text_px_size;
+	}
 }
 
-BGES_PUBLIC_API void bgesbe_destroy_ctx(bges_ffi::version front_end_version, /* out */ bges_ffi::backend_win_ctx *ctx) {
+BGES_PUBLIC_API void bgesbe_destroy_ctx(bges_ffi::version /*front_end_version*/, /* out */ bges_ffi::backend_win_ctx *ctx) {
 	delete[] ctx->error_str;
 	delete get_pdata(ctx);
 	ctx->data = nullptr;

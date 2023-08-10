@@ -10,6 +10,7 @@ namespace bges {
 
 class Rectangle;
 class Line;
+class Label;
 
 class BGES_CPPEXPORT Scene : public event_publisher::MouseEvents<Scene> {
 public:
@@ -24,17 +25,18 @@ public:
 		friend class Window;
 	};
 
-	Scene();
+	static std::shared_ptr<Scene> create();
 
-	const std::shared_ptr<Parent>& get_root() noexcept;
-	void set_root(std::shared_ptr<Parent>) noexcept;
+	[[nodiscard]] const std::shared_ptr<Parent>& get_root() noexcept;
+	static void set_root(const std::shared_ptr<Scene>& this_scene, std::shared_ptr<Parent>) noexcept;
 
     [[nodiscard]] const Viewport& get_viewport() const noexcept;
     Viewport& viewport() noexcept;
     void set_viewport(const Viewport&) noexcept;
 
-    void draw(const Rectangle &rect) noexcept;
-    void draw(const Line &line) noexcept;
+    void draw(const Rectangle &rect, const PointF& relative_to = PointF{0.f,0.f}) noexcept;
+    void draw(const Line &line, const PointF& relative_to = PointF{0.f, 0.f}) noexcept;
+	void draw(const Label& label, const PointF& relative_to = PointF{0.f, 0.f}) noexcept;
 
 	void hide() noexcept {
 		m_hidden = true;
@@ -45,6 +47,7 @@ public:
 	}
 
 private:
+
 	void render() noexcept;
 
     void mouse_move(const event::MouseMove&);

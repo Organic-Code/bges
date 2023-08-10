@@ -8,6 +8,7 @@
 #endif
 
 #include "common/exchanged_types.h"
+#include "bges/bges.hpp"
 
 #include "backend_context.hpp"
 
@@ -122,6 +123,35 @@ std::optional<backend::Context> sanitize(backend::Context &ctx) {
 }
 } // namespace
 
+namespace {
+struct state {
+	std::filesystem::path library_path{};
+	bool initialized{false};
+};
+
+state glob_state{};
+} // namespace
+const std::filesystem::path& bges::backend::glob_library_path{glob_state.library_path};
+
+bool bges::init(const std::filesystem::path& lib_path) {
+	if (!glob_state.initialized) {
+#if BGES_STATIC_BACKEND == 0
+		if (!std::filesystem::is_regular_file(lib_path)) {
+			return false;
+		}
+#endif
+		glob_state.library_path = lib_path;
+		glob_state.initialized = true;
+		return true;
+	}
+	return false;
+}
+
+bool bges::is_init() {
+	return glob_state.initialized;
+}
+
+
 backend::Context::~Context() {
 	if (m_handle == nullptr) {
 		return;
@@ -149,25 +179,22 @@ backend::Context::Context(backend::Context &&other) noexcept {
 	*this = std::move(other);
 }
 
+
 // todo : return fail reason
-#if BGES_STATIC_BACKEND == 1
 std::optional<backend::Context> backend::init() {
 	Context ctx{};
+#if BGES_STATIC_BACKEND == 1
 	bgesbe_init_ctx(my_version, &ctx);
 	ctx.destroy_ctx = bgesbe_destroy_ctx;
 
-	return sanitize(ctx);
-}
 #else
-std::optional<backend::Context> backend::init(const std::filesystem::path &path) {
-	Context ctx{};
 
 	std::string str_path;
-	if (path.is_relative()) {
-		str_path = "./" + path.generic_string();
+	if (glob_library_path.is_relative()) {
+		str_path = "./" + glob_library_path.generic_string();
 	}
 	else {
-		str_path = path.generic_string();
+		str_path = glob_library_path.generic_string();
 	}
 
 #	if defined OS_LINUX
@@ -178,7 +205,7 @@ std::optional<backend::Context> backend::init(const std::filesystem::path &path)
 			c = '\\'; // required by LoadLibrary for some reason
 		}
 	}
-	bool exists  = std::filesystem::is_regular_file(str_path);
+
 	ctx.m_handle = LoadLibrary(str_path.c_str());
 #	endif
 
@@ -208,6 +235,6 @@ std::optional<backend::Context> backend::init(const std::filesystem::path &path)
 	ctx_init(my_version, &ctx);
 	ctx.destroy_ctx = ctx_destroy;
 
+#endif
 	return sanitize(ctx);
 }
-#endif

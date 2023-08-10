@@ -15,7 +15,7 @@ struct Context: bges_ffi::backend_win_ctx {
 
 	Context(Context &&) noexcept;
 	Context(const Context &) = delete;
-	Context &operator        =(Context &&) noexcept;
+	Context &operator=(Context &&) noexcept;
 	Context &operator=(const Context &) = delete;
 	~Context();
 
@@ -31,18 +31,18 @@ private:
 	Context() noexcept
 	    : bges_ffi::backend_win_ctx{} {};
 
-#if BGES_STATIC_BACKEND == 1
 	friend std::optional<Context> init();
-#else
-	friend std::optional<Context> init(const std::filesystem::path &);
-#endif
 };
 
+
 #if BGES_STATIC_BACKEND == 1
-[[nodiscard]] std::optional<Context> init();
-#else
-[[nodiscard]] std::optional<Context> init(const std::filesystem::path &);
+	[[maybe_unused]]
 #endif
+	extern const std::filesystem::path& glob_library_path; // Path to the .dll/.so library. Must be set before call to .open. Is set by bges::init(std::fs::path)
+
+
+
+[[nodiscard]] std::optional<Context> init();
 
 } // namespace bges::backend
 

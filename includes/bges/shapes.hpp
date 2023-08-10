@@ -15,7 +15,7 @@ public:
 	Color fill_color{};
 
 protected:
-    void vrender(Scene&) noexcept override;
+    void vrender(Scene&, const PointF& relative_to) noexcept override;
 };
 
 class BGES_CPPEXPORT Line : public Renderable {
@@ -24,7 +24,7 @@ public:
 	Color color{};
 
 protected:
-    void vrender(Scene&) noexcept override;
+    void vrender(Scene&, const PointF& relative_to) noexcept override;
 };
 
 } // namespace bges

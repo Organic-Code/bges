@@ -1,6 +1,7 @@
 #include <cassert>
 #include <memory>
 
+#include <bges/bges.hpp>
 #include <bges/events.hpp>
 #include <bges/scene.hpp>
 #include <bges/shapes.hpp>
@@ -10,104 +11,6 @@
 #include "backend_context.hpp"
 #include "utils.hpp"
 
-static_assert(bges_ffi::mouse_button::LEFT == static_cast<int>(bges::MouseButton::left));
-static_assert(bges_ffi::mouse_button::RIGHT == static_cast<int>(bges::MouseButton::right));
-static_assert(bges_ffi::mouse_button::MIDDLE == static_cast<int>(bges::MouseButton::middle));
-static_assert(bges_ffi::mouse_button::PREVIOUS == static_cast<int>(bges::MouseButton::prev));
-static_assert(bges_ffi::mouse_button::NEXT == static_cast<int>(bges::MouseButton::next));
-static_assert(bges_ffi::mouse_button::UNLISTED_BUTTON_CODE == static_cast<int>(bges::MouseButton::unlisted));
-
-static_assert(bges_ffi::key::KB_0 == static_cast<unsigned int>(bges::Key::keyboard0));
-static_assert(bges_ffi::key::KB_1 == static_cast<unsigned int>(bges::Key::keyboard1));
-static_assert(bges_ffi::key::KB_2 == static_cast<unsigned int>(bges::Key::keyboard2));
-static_assert(bges_ffi::key::KB_3 == static_cast<unsigned int>(bges::Key::keyboard3));
-static_assert(bges_ffi::key::KB_4 == static_cast<unsigned int>(bges::Key::keyboard4));
-static_assert(bges_ffi::key::KB_5 == static_cast<unsigned int>(bges::Key::keyboard5));
-static_assert(bges_ffi::key::KB_6 == static_cast<unsigned int>(bges::Key::keyboard6));
-static_assert(bges_ffi::key::KB_7 == static_cast<unsigned int>(bges::Key::keyboard7));
-static_assert(bges_ffi::key::KB_8 == static_cast<unsigned int>(bges::Key::keyboard8));
-static_assert(bges_ffi::key::KB_9 == static_cast<unsigned int>(bges::Key::keyboard9));
-static_assert(bges_ffi::key::NUM_0 == static_cast<unsigned int>(bges::Key::numpad0));
-static_assert(bges_ffi::key::NUM_1 == static_cast<unsigned int>(bges::Key::numpad1));
-static_assert(bges_ffi::key::NUM_2 == static_cast<unsigned int>(bges::Key::numpad2));
-static_assert(bges_ffi::key::NUM_3 == static_cast<unsigned int>(bges::Key::numpad3));
-static_assert(bges_ffi::key::NUM_4 == static_cast<unsigned int>(bges::Key::numpad4));
-static_assert(bges_ffi::key::NUM_5 == static_cast<unsigned int>(bges::Key::numpad5));
-static_assert(bges_ffi::key::NUM_6 == static_cast<unsigned int>(bges::Key::numpad6));
-static_assert(bges_ffi::key::NUM_7 == static_cast<unsigned int>(bges::Key::numpad7));
-static_assert(bges_ffi::key::NUM_8 == static_cast<unsigned int>(bges::Key::numpad8));
-static_assert(bges_ffi::key::NUM_9 == static_cast<unsigned int>(bges::Key::numpad9));
-static_assert(bges_ffi::key::NUM_DECIMAL_SEPARATOR == static_cast<unsigned int>(bges::Key::numpad_decimal_separator));
-static_assert(bges_ffi::key::STAR == static_cast<unsigned int>(bges::Key::star));
-static_assert(bges_ffi::key::SLASH == static_cast<unsigned int>(bges::Key::slash));
-static_assert(bges_ffi::key::MINUS == static_cast<unsigned int>(bges::Key::minus));
-static_assert(bges_ffi::key::PLUS == static_cast<unsigned int>(bges::Key::plus));
-static_assert(bges_ffi::key::PERCENT == static_cast<unsigned int>(bges::Key::percent));
-static_assert(bges_ffi::key::A == static_cast<unsigned int>(bges::Key::a));
-static_assert(bges_ffi::key::B == static_cast<unsigned int>(bges::Key::b));
-static_assert(bges_ffi::key::C == static_cast<unsigned int>(bges::Key::c));
-static_assert(bges_ffi::key::D == static_cast<unsigned int>(bges::Key::d));
-static_assert(bges_ffi::key::E == static_cast<unsigned int>(bges::Key::e));
-static_assert(bges_ffi::key::F == static_cast<unsigned int>(bges::Key::f));
-static_assert(bges_ffi::key::G == static_cast<unsigned int>(bges::Key::g));
-static_assert(bges_ffi::key::H == static_cast<unsigned int>(bges::Key::h));
-static_assert(bges_ffi::key::I == static_cast<unsigned int>(bges::Key::i));
-static_assert(bges_ffi::key::J == static_cast<unsigned int>(bges::Key::j));
-static_assert(bges_ffi::key::K == static_cast<unsigned int>(bges::Key::k));
-static_assert(bges_ffi::key::L == static_cast<unsigned int>(bges::Key::l));
-static_assert(bges_ffi::key::M == static_cast<unsigned int>(bges::Key::m));
-static_assert(bges_ffi::key::N == static_cast<unsigned int>(bges::Key::n));
-static_assert(bges_ffi::key::O == static_cast<unsigned int>(bges::Key::o));
-static_assert(bges_ffi::key::P == static_cast<unsigned int>(bges::Key::p));
-static_assert(bges_ffi::key::Q == static_cast<unsigned int>(bges::Key::q));
-static_assert(bges_ffi::key::R == static_cast<unsigned int>(bges::Key::r));
-static_assert(bges_ffi::key::S == static_cast<unsigned int>(bges::Key::s));
-static_assert(bges_ffi::key::T == static_cast<unsigned int>(bges::Key::t));
-static_assert(bges_ffi::key::U == static_cast<unsigned int>(bges::Key::u));
-static_assert(bges_ffi::key::V == static_cast<unsigned int>(bges::Key::v));
-static_assert(bges_ffi::key::W == static_cast<unsigned int>(bges::Key::w));
-static_assert(bges_ffi::key::X == static_cast<unsigned int>(bges::Key::x));
-static_assert(bges_ffi::key::Y == static_cast<unsigned int>(bges::Key::y));
-static_assert(bges_ffi::key::Z == static_cast<unsigned int>(bges::Key::z));
-static_assert(bges_ffi::key::F1 == static_cast<unsigned int>(bges::Key::F1));
-static_assert(bges_ffi::key::F2 == static_cast<unsigned int>(bges::Key::F2));
-static_assert(bges_ffi::key::F3 == static_cast<unsigned int>(bges::Key::F3));
-static_assert(bges_ffi::key::F4 == static_cast<unsigned int>(bges::Key::F4));
-static_assert(bges_ffi::key::F5 == static_cast<unsigned int>(bges::Key::F5));
-static_assert(bges_ffi::key::F6 == static_cast<unsigned int>(bges::Key::F6));
-static_assert(bges_ffi::key::F7 == static_cast<unsigned int>(bges::Key::F7));
-static_assert(bges_ffi::key::F8 == static_cast<unsigned int>(bges::Key::F8));
-static_assert(bges_ffi::key::F9 == static_cast<unsigned int>(bges::Key::F9));
-static_assert(bges_ffi::key::F10 == static_cast<unsigned int>(bges::Key::F10));
-static_assert(bges_ffi::key::F11 == static_cast<unsigned int>(bges::Key::F11));
-static_assert(bges_ffi::key::F12 == static_cast<unsigned int>(bges::Key::F12));
-static_assert(bges_ffi::key::F13 == static_cast<unsigned int>(bges::Key::F13));
-static_assert(bges_ffi::key::F14 == static_cast<unsigned int>(bges::Key::F14));
-static_assert(bges_ffi::key::F15 == static_cast<unsigned int>(bges::Key::F15));
-static_assert(bges_ffi::key::SPACE == static_cast<unsigned int>(bges::Key::space));
-static_assert(bges_ffi::key::ENTER == static_cast<unsigned int>(bges::Key::enter));
-static_assert(bges_ffi::key::DEL == static_cast<unsigned int>(bges::Key::del));
-static_assert(bges_ffi::key::BACKSPACE == static_cast<unsigned int>(bges::Key::backspace));
-static_assert(bges_ffi::key::UP == static_cast<unsigned int>(bges::Key::up));
-static_assert(bges_ffi::key::DOWN == static_cast<unsigned int>(bges::Key::down));
-static_assert(bges_ffi::key::LEFT == static_cast<unsigned int>(bges::Key::left));
-static_assert(bges_ffi::key::RIGHT == static_cast<unsigned int>(bges::Key::right));
-static_assert(bges_ffi::key::PAGE_UP == static_cast<unsigned int>(bges::Key::page_up));
-static_assert(bges_ffi::key::PAGE_DOWN == static_cast<unsigned int>(bges::Key::page_down));
-static_assert(bges_ffi::key::TAB == static_cast<unsigned int>(bges::Key::tab));
-static_assert(bges_ffi::key::END == static_cast<unsigned int>(bges::Key::end));
-static_assert(bges_ffi::key::ESCAPE == static_cast<unsigned int>(bges::Key::escape));
-static_assert(bges_ffi::key::INSERT == static_cast<unsigned int>(bges::Key::insert));
-static_assert(bges_ffi::key::PAUSE == static_cast<unsigned int>(bges::Key::pause));
-static_assert(bges_ffi::key::PLAYPAUSE == static_cast<unsigned int>(bges::Key::playpause));
-static_assert(bges_ffi::key::PLAY == static_cast<unsigned int>(bges::Key::play));
-static_assert(bges_ffi::key::RCTRL == static_cast<unsigned int>(bges::Key::right_ctrl));
-static_assert(bges_ffi::key::LCTRL == static_cast<unsigned int>(bges::Key::left_ctrl));
-static_assert(bges_ffi::key::RCAPS == static_cast<unsigned int>(bges::Key::right_caps));
-static_assert(bges_ffi::key::LCAPS == static_cast<unsigned int>(bges::Key::left_caps));
-static_assert(bges_ffi::key::META == static_cast<unsigned int>(bges::Key::meta));
-static_assert(bges_ffi::key::UNLISTED_KEY_CODE == static_cast<unsigned int>(bges::Key::unlisted));
-
 bges::Window::backend_ctx_ptr_t::~backend_ctx_ptr_t() = default;
 
 bges::Window::Window() = default;
@@ -115,28 +18,11 @@ bges::Window::Window() = default;
 bges::Window::~Window() = default;
 
 bool bges::Window::open(const char *name) noexcept {
-#if BGES_STATIC_BACKEND == 1
-	std::optional<bges::backend::Context> ctx = backend::init();
-#else
-	// FIXME
-	std::string dll_path = std::filesystem::current_path().generic_string() + "/";
-	if (std::filesystem::is_regular_file("libbges_sfml-backenddbg.so")) {
-		dll_path += "libbges_sfml-backenddbg.so";
-	}
-	else if (std::filesystem::is_regular_file("bges_sfml-backenddbg.dll")) {
-		dll_path += "bges_sfml-backenddbg.dll";
-	}
-	else if (std::filesystem::is_regular_file("libbges_sfml-backend.so")) {
-		dll_path += "libbges_sfml-backend.so";
-	}
-	else if (std::filesystem::is_regular_file("bges_sfml-backend.dll")) {
-		dll_path += "bges_sfml-backend.dll";
-	}
-	else {
+	if (!bges::is_init()) {
 		return false;
 	}
-	std::optional<bges::backend::Context> ctx = backend::init(dll_path);
-#endif
+
+	std::optional<bges::backend::Context> ctx = backend::init();
 	if (!ctx) {
 		return false;
 	}
@@ -153,9 +39,9 @@ bool bges::Window::open(const char *name, unsigned int width, unsigned int heigh
 	return false;
 }
 void bges::Window::set_viewport(const Viewport &vp) {
-	auto tl = vp.get_top_left();
-	auto sz = vp.get_size();
-	m_ctx->set_viewport(m_ctx.get(), bges_ffi::viewport{tl.x, tl.y, sz.width, sz.height});
+	auto tol = vp.get_top_left();
+	auto siz = vp.get_size();
+	m_ctx->set_viewport(m_ctx.get(), bges_ffi::viewport{tol.x, tol.y, siz.width, siz.height});
 }
 
 void bges::Window::set_size(unsigned int width, unsigned int height) noexcept {
@@ -192,7 +78,7 @@ void bges::Window::render() noexcept {
 	auto deleter              = [this](bges_ffi::event_list *el) {
         m_ctx->free_events(m_ctx.get(), el);
 	};
-	std::unique_ptr<bges_ffi::event_list, decltype(deleter)> events_ptr(&events, std::move(deleter));
+	const std::unique_ptr<bges_ffi::event_list, decltype(deleter)> events_ptr(&events, std::move(deleter));
 
 	m_ctx->retrieve_events(m_ctx.get(), &events);
 

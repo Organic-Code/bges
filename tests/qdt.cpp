@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include <bges/bges.hpp>
 #include <bges/colors.hpp>
 #include <bges/shapes.hpp>
 #include <bges/viewport.hpp>
@@ -17,7 +18,27 @@ void close_window(bges::Window &window, const bges::event::CloseRequest&) {
 }
 } // namespace
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "altera-unroll-loops"
 SCENARIO("drawing a single rectangle") {
+
+#if BGES_STATIC_BACKEND == 0
+#ifdef OS_LINUX
+#ifdef DEBUG
+	const auto LIBRARY_FILE = std::filesystem::current_path() / "libbges_sfml-backenddbg.so";
+#elif defined NDEBUG
+	const auto LIBRARY_FILE = std::filesystem::current_path() / "libbges_sfml-backend.so";
+#endif
+#elif defined OS_WINDOWS
+#ifdef DEBUG
+	const auto LIBRARY_FILE = std::filesystem::current_path() / "bges_sfml-backenddbg.dll";
+#elif defined NDEBUG
+	const auto LIBRARY_FILE = std::filesystem::current_path() / "bges_sfml-backend.dll";
+#endif
+#endif
+#endif
+	bges::init();
+
 	bges::Window window{};
 	window.on_close_request(close_window);
 
@@ -31,7 +52,7 @@ SCENARIO("drawing a single rectangle") {
 	REQUIRE(window.open("akekoukou", 1920, 1080));
 	window.set_viewport(bges::Viewport{0, 0, 1920, 1080});
 
-    auto scene = std::make_shared<bges::Scene>();
+    auto scene = bges::Scene::create();
     auto first_rect = std::make_shared<bges::Rectangle>(rect);
 	scene->get_root()->add_child(first_rect);
 
@@ -57,15 +78,14 @@ SCENARIO("drawing a single rectangle") {
     auto last_rect = std::make_shared<bges::Rectangle>(rect);
     scene->get_root()->add_child(last_rect);
 
-	auto button = std::make_shared<bges::Button>();
-	button->on_click([&](bges::Button& btn, const bges::event::Click& a) {
+	auto button = std::make_shared<bges::Button>("Click me!");
+	button->on_click([last_rect](bges::Button&  /*btn*/, const bges::event::Click&  /*unused*/) {
 		last_rect->to_front();
 		last_rect->fill_color = bges::IColor{static_cast<std::uint8_t>(rand() % 255), static_cast<std::uint8_t>(rand() % 255), static_cast<std::uint8_t>(rand() % 255), static_cast<std::uint8_t>(rand() % 200 + 55)};
 	});
-	scene->get_root()->add_child(std::move(button));
+	scene->get_root()->add_child(button);
 
-
-	srand(time(0));
+	srand(time(nullptr));
 	for (int count = 0 ; count < 100 ; ++count) {
 		if (count % 50 < 25) {
             rect.rect.y += 15;
@@ -81,6 +101,10 @@ SCENARIO("drawing a single rectangle") {
 //	scene->bring_to_front(first_rect.get());
 //	scene->bring_to_back(last_rect.get());
 
+	scene->get_root()->on_mouse_press([](auto&, const auto&) { std::cout << "Mouse pressed on scene root!\n" << std::flush; });
+
+
+	button->to_front();
 
 	window.add_scene(std::move(scene));
 
@@ -91,3 +115,4 @@ SCENARIO("drawing a single rectangle") {
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 }
+#pragma clang diagnostic pop

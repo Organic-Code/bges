@@ -2,6 +2,7 @@
 #define BGES_EVENTS_HPP
 
 #include <cstdint>
+#include <cstddef>
 
 namespace bges {
 enum class MouseButton {
@@ -114,7 +115,14 @@ enum class Key {
 	left_ctrl,
 	right_caps,
 	left_caps,
+	right_shift,
+	left_shift,
+	right_alt,
+	left_alt,
 	meta,
+	right_system,
+	left_system,
+	menu,
 
 	unlisted,
 
@@ -172,8 +180,15 @@ struct FocusLose { };
 
 struct FocusGain { };
 
-struct Click { };
+struct Click {
+	MouseButton button;
+};
 
+struct DataUpdate { };
+
+struct AtomicTextUpdate {
+	std::size_t update_index; // index at which the text has been updated
+};
 } // namespace bges::event
 
 #endif //BGES_EVENTS_HPP

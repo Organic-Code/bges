@@ -13,6 +13,7 @@
 #	define BGES_ENUMNAME(x)      x
 #else
 #	include <stdint.h>
+#	include <bool.h>
 #	define BGES_NAMESPACE(x)
 #	define BGES_INL_NAMESPACE(x)
 #	define BGES_END_NAMESPACE
@@ -32,6 +33,7 @@ typedef struct bges_version {
 typedef struct bges_point {
 	int32_t x;
 	int32_t y;
+	uint32_t resolution; // float_pos = int32_pos / resolution
 } BGES_NAME(point);
 
 typedef struct bges_size {
@@ -164,7 +166,14 @@ typedef enum {
 	BGES_ENUMNAME(LCTRL),
 	BGES_ENUMNAME(RCAPS),
 	BGES_ENUMNAME(LCAPS),
+	BGES_ENUMNAME(RSHIFT),
+	BGES_ENUMNAME(LSHIFT),
+	BGES_ENUMNAME(RALT),
+	BGES_ENUMNAME(LALT),
 	BGES_ENUMNAME(META),
+	BGES_ENUMNAME(RSYSTEM),
+	BGES_ENUMNAME(LSYSTEM),
+	BGES_ENUMNAME(MENU),
 
 	BGES_ENUMNAME(UNLISTED_KEY_CODE),
 
@@ -190,11 +199,11 @@ typedef enum {
 BGES_END_NAMESPACE
 
 typedef struct bges_event {
-    std::uint8_t type; // refers to the enum bges_event_type/bges_ffi::event_type::event_type
+	uint8_t type; // refers to the enum bges_event_type/bges_ffi::event_type::event_type
 	union {
 		struct {
-			std::uint16_t hw_key_code; // "hardware" code (layout independent)
-			std::uint16_t key; // refers to the enum bges_key/bges_ffi::key::key
+			uint16_t hw_key_code; // "hardware" code (layout independent)
+			uint16_t key; // refers to the enum bges_key/bges_ffi::key::key
 			bool is_meta_pressed;
 			bool is_shift_pressed;
 			bool is_capslock_locked;
@@ -203,16 +212,16 @@ typedef struct bges_event {
 		} key;
 
 		struct {
-			std::uint8_t hw_btn_code; // "hardware" code
-			std::uint8_t kind; // refers to the enum bges_mouse_button/bges_ffi::mouse_button::mouse_button
+			uint8_t hw_btn_code; // "hardware" code
+			uint8_t kind; // refers to the enum bges_mouse_button/bges_ffi::mouse_button::mouse_button
 			struct bges_point pos;
 		} mouse_button;
 
 		struct {
-			std::uint8_t delta;
-			std::uint8_t wheel_id;
-			bool horizontal_scroll; // or vertical
-			bool upwards; // or downwards (horizontal : leftwards or rightwards)
+			uint8_t delta;
+			uint8_t wheel_id;
+			bool horizontal_scroll; // (true), or vertical (false)
+			bool upwards; // or downwards (horizontal : up = leftwards or down = rightwards)
 			struct bges_point pos;
 		} mouse_scroll;
 
@@ -224,7 +233,7 @@ typedef struct bges_event {
 	};
 } BGES_NAME(event);
 
-typedef struct bges_event_list {
+typedef struct bges_event_list { // as an array
 	struct bges_event *begin;
 	struct bges_event *end;
 } BGES_NAME(event_list);
@@ -233,17 +242,21 @@ typedef struct bges_backend_win_ctx {
 
 	/** Methods populated by backend **/
 	// mandatory methods
-	bool (*open)(struct bges_backend_win_ctx *,
-	             const char *window_name); // returns true on success. On error, return false and set error_str accordingly
+	uint8_t (*open)(
+	  struct bges_backend_win_ctx *,
+	  const char *window_name); // returns true (1) on success. On error, return false (0) and set error_str accordingly (if possible)
 	void (*resize)(struct bges_backend_win_ctx *, struct bges_size);
+	void (*move)(struct bges_backend_win_ctx *, struct bges_point delta); // TODO: EXPOSE moves the window (esp. usefull for subwindows)
+	void (*set_position)(struct bges_backend_win_ctx *, struct bges_point); // TODO: EXPOSE (in frontend)
+	void (*get_position)(struct bges_backend_win_ctx *, struct bges_point* out); // TODO: EXPOSE (in frontend)
 	void (*close)(struct bges_backend_win_ctx *);
 	bool (*is_open)(struct bges_backend_win_ctx *);
 	void (*set_viewport)(struct bges_backend_win_ctx *, struct bges_viewport);
 
-    void (*retrieve_events)(struct bges_backend_win_ctx *, struct bges_event_list *out);
-	void (*free_events)(struct bges_backend_win_ctx *, struct bges_event_list* list);
+	void (*retrieve_events)(struct bges_backend_win_ctx *, struct bges_event_list *out);
+	void (*free_events)(struct bges_backend_win_ctx *, struct bges_event_list *list);
 
-    void (*render)(struct bges_backend_win_ctx *);
+	void (*render)(struct bges_backend_win_ctx *);
 	void (*clear)(struct bges_backend_win_ctx *);
 
 	void (*draw_line)(struct bges_backend_win_ctx *, struct bges_point begin, struct bges_point end, struct bges_color);
@@ -253,6 +266,14 @@ typedef struct bges_backend_win_ctx {
 	                       struct bges_color); // min corner minimizes x and y
 	void (*draw_outlined_rectangle)(struct bges_backend_win_ctx *, struct bges_point, struct bges_size, struct bges_color fill_color,
 	                                uint16_t outline_thickness, struct bges_color outline_color); // min corner minimizes x and y
+
+	// text management methods. Populate all or populate none. Used only if no fonts are set.
+	void (*draw_text_line)(struct bges_backend_win_ctx *, struct bges_point, const char *text);
+    	const char *(*draw_text_lenlim)(
+	  struct bges_backend_win_ctx *, struct bges_point, const char *text,
+	  uint32_t px_len); // prints at most px_len pixels.
+						// Returns a pointer to the first char that was not printed, or to '\0' if all was printed
+	uint32_t (*text_px_size)(struct bges_backend_win_ctx *, const char *text); // computes the length of the given string (in pixels)
 
 	/** Stored Data **/
 	// data

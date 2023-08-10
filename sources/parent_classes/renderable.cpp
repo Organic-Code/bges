@@ -4,9 +4,9 @@
 #include <bges/base_classes/parent.hpp>
 #include <bges/geometry.hpp>
 
-void bges::Renderable::render(bges::Scene& sc) noexcept {
+void bges::Renderable::render(bges::Scene& sc, const PointF& relative_to) noexcept {
 	if (!is_hidden()) {
-		vrender(sc);
+		vrender(sc, relative_to);
 	}
 }
 

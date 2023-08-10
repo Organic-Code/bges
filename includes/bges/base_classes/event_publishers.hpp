@@ -1,11 +1,15 @@
 #ifndef BGES_BASE_CLASSES_EVENT_PUBLISHERS_HPP
 #define BGES_BASE_CLASSES_EVENT_PUBLISHERS_HPP
 
+#include <cassert>
 #include <functional>
 #include <unordered_map>
 
 #include <bges/details/export.hpp>
 
+/**
+ * Events classes that contain events data when such events are fired.
+ */
 namespace bges::event {
 struct MouseMove;
 struct MousePress;
@@ -18,6 +22,8 @@ struct FocusLose;
 struct FocusGain;
 struct Resize;
 struct Click;
+struct DataUpdate;
+struct AtomicTextUpdate;
 } // namespace bges::event
 
 #define BGES_EVENT_PUBLISHER(class_name, snake_case)                                                                                       \
@@ -31,62 +37,67 @@ struct Click;
 		void fire_##snake_case(Source &source, const ::bges::event::class_name &event);                                                    \
                                                                                                                                            \
 	private:                                                                                                                               \
-		std::size_t c_max_id{0};                                                                                                           \
-		std::unordered_map<std::size_t, std::function<void(Source &, const ::bges::event::class_name &)>> listener_map;                    \
+		std::size_t m_max_id{0};                                                                                                           \
+		std::unordered_map<std::size_t, std::function<void(Source &, const ::bges::event::class_name &)>> m_listener_map;                  \
 	};                                                                                                                                     \
                                                                                                                                            \
 	template <typename Source>                                                                                                             \
 	std::size_t class_name<Source>::on_##snake_case(std::function<void(Source &, const ::bges::event::class_name &)> listener) {           \
-		listener_map.insert({c_max_id, std::move(listener)});                                                                              \
-		return c_max_id++;                                                                                                                 \
+		m_listener_map.insert({m_max_id, std::move(listener)});                                                                            \
+		return m_max_id++;                                                                                                                 \
 	}                                                                                                                                      \
                                                                                                                                            \
 	template <typename Source>                                                                                                             \
 	void class_name<Source>::remove_##snake_case##_listener(std::size_t listener_id) {                                                     \
-		listener_map.erase(listener_id);                                                                                                   \
+		m_listener_map.erase(listener_id);                                                                                                 \
 	}                                                                                                                                      \
                                                                                                                                            \
 	template <typename Source>                                                                                                             \
 	void class_name<Source>::fire_##snake_case(Source &source, const ::bges::event::class_name &event) {                                   \
-		for (auto &fn : listener_map) {                                                                                                    \
+		for (auto &fnct : m_listener_map) {                                                                                                \
 			try {                                                                                                                          \
-				fn.second(source, event);                                                                                                  \
+				fnct.second(source, event);                                                                                                \
 			}                                                                                                                              \
 			catch (const std::exception &e) {                                                                                              \
 				/* TODO */                                                                                                                 \
+                assert(false && "exception caught during event processing");                                                               \
 			}                                                                                                                              \
-			catch (const std::exception *e) {                                                                                              \
+			catch (const std::exception *e) { /* NOLINT(*-throw-by-value-catch-by-reference) */                                            \
 				/* TODO */                                                                                                                 \
-				delete e;                                                                                                                  \
+				delete e; /* NOLINT(*-owning-memory) */                                                                                    \
+                assert(false && "exception caught during event processing");                                                               \
 			}                                                                                                                              \
 			catch (...) {                                                                                                                  \
 				/* TODO */                                                                                                                 \
+                assert(false && "exception caught during event processing");                                                               \
 			}                                                                                                                              \
 		}                                                                                                                                  \
 	}
 
 namespace bges::event_publisher {
 
-BGES_EVENT_PUBLISHER(MouseMove, mouse_move)
-BGES_EVENT_PUBLISHER(MousePress, mouse_press)
-BGES_EVENT_PUBLISHER(MouseRelease, mouse_release)
-BGES_EVENT_PUBLISHER(MouseScroll, mouse_scroll)
-BGES_EVENT_PUBLISHER(KeyPress, key_press)
-BGES_EVENT_PUBLISHER(KeyRelease, key_release)
-BGES_EVENT_PUBLISHER(CloseRequest, close_request)
-BGES_EVENT_PUBLISHER(FocusLose, focus_lose)
-BGES_EVENT_PUBLISHER(FocusGain, focus_gain)
-BGES_EVENT_PUBLISHER(Resize, resize)
-BGES_EVENT_PUBLISHER(Click, click)
+BGES_EVENT_PUBLISHER(MouseMove, mouse_move)                      // Mouse being moved around
+BGES_EVENT_PUBLISHER(MousePress, mouse_press)                    // Mouse button being pressed (left, right, middle, others)
+BGES_EVENT_PUBLISHER(MouseRelease, mouse_release)                // Mouse button being released
+BGES_EVENT_PUBLISHER(MouseScroll, mouse_scroll)                  // Mouse wheel scrolled
+BGES_EVENT_PUBLISHER(KeyPress, key_press)                        // Keyboard pressed
+BGES_EVENT_PUBLISHER(KeyRelease, key_release)                    // Keyboard released
+BGES_EVENT_PUBLISHER(CloseRequest, close_request)                // Window close request (eg : click on the top right cross)
+BGES_EVENT_PUBLISHER(FocusLose, focus_lose)                      // Window or GUI element focus lost
+BGES_EVENT_PUBLISHER(FocusGain, focus_gain)                      // Window or GUI element focus gained
+BGES_EVENT_PUBLISHER(Resize, resize)                             // Window resized
+BGES_EVENT_PUBLISHER(Click, click)                               // "Click" event (Mouse press + mouse release on the same gui element)
+BGES_EVENT_PUBLISHER(DataUpdate, data_update)                    // GUI data element updated (eg : text or color being changed. For text : called when action is completed [eg : text field focus is lost after typing])
+BGES_EVENT_PUBLISHER(AtomicTextUpdate, atomic_text_update)       // GUI text updated, called for every letter
 
-template <typename T>
-class MouseEvents: public MouseMove<T>, public MousePress<T>, public MouseRelease<T>, public MouseScroll<T> { };
+template <typename Source>
+class MouseEvents: public MouseMove<Source>, public MousePress<Source>, public MouseRelease<Source>, public MouseScroll<Source> { };
 
-template <typename T>
-class KeyboardEvents: public KeyPress<T>, public KeyRelease<T> { };
+template <typename Source>
+class KeyboardEvents: public KeyPress<Source>, public KeyRelease<Source> { };
 
-template <typename T>
-class WindowEvents: public CloseRequest<T>, public FocusLose<T>, public FocusGain<T>, public Resize<T> { };
+template <typename Source>
+class WindowEvents: public CloseRequest<Source>, public FocusLose<Source>, public FocusGain<Source>, public Resize<Source> { };
 
 } // namespace bges::event_publisher
 

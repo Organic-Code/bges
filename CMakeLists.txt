@@ -32,8 +32,8 @@ target_include_directories(bges PRIVATE includes/ sources/)
 set_target_properties(bges PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if (HAS_PARENT)
-    set(BGES_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/includes PARENT_SCOPE)
-    set(BGES_LIBRARIES $<TARGET_FILE:bges> PARENT_SCOPE)
+    set(BGES_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/includes" PARENT_SCOPE)
+    set(BGES_LIBRARIES "$<TARGET_FILE:bges>" PARENT_SCOPE)
 endif()
 
 if (BGES_STATIC_BACKEND)
@@ -82,6 +82,11 @@ set_target_properties(bges_sfml-backend PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 ### Tests
 
+file(GLOB_RECURSE runtime_files runtime/*)
+foreach(file ${runtime_files})
+    configure_file("${file}" "${CMAKE_CURRENT_BINARY_DIR}/" COPYONLY)
+endforeach()
+
 include(external/Catch2/Catch.cmake)
 
 file(GLOB_RECURSE bges_tests_sources tests/*.cpp)
@@ -90,5 +95,12 @@ bges_configure_target(bges_tests)
 target_include_directories(bges_tests PRIVATE includes/ external/Catch2/include)
 target_link_libraries(bges_tests bges)
 bges_link_threads(bges_tests)
+
+#target_compile_definitions(bges_tests PRIVATE LIBRARY_FILE "$<TARGET_FILE:bges_sfml-backend>")
+if (BGES_STATIC_BACKEND)
+    target_compile_definitions(bges_tests PRIVATE BGES_STATIC_BACKEND=1)
+else()
+    target_compile_definitions(bges_tests PRIVATE BGES_STATIC_BACKEND=0)
+endif()
 
 include(CTest)
