@@ -1,5 +1,5 @@
-#ifndef BGES_UNMANAGED_HPP
-#define BGES_UNMANAGED_HPP
+#ifndef BGES_CONTAINERS_UNMANAGED_HPP
+#define BGES_CONTAINERS_UNMANAGED_HPP
 
 #include <bges/details/export.hpp>
 #include <bges/base_classes/parent.hpp>
@@ -20,4 +20,4 @@ private:
 };
 }
 
-#endif //BGES_UNMANAGED_HPP
+#endif //BGES_CONTAINERS_UNMANAGED_HPP

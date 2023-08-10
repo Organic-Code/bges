@@ -1,6 +1,6 @@
+#include <bges/end_nodes/label.hpp>
 #include <bges/end_nodes/button.hpp>
 #include <bges/events.hpp>
-#include <bges/label.hpp>
 #include <bges/scene.hpp>
 #include <bges/shapes.hpp>
 

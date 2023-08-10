@@ -1,9 +1,9 @@
-#ifndef BGES_LABEL_HPP
-#define BGES_LABEL_HPP
+#ifndef BGES_END_NODES_LABEL_HPP
+#define BGES_END_NODES_LABEL_HPP
 
+#include <bges/base_classes/renderable.hpp>
 #include <bges/colors.hpp>
 #include <bges/geometry.hpp>
-#include <bges/base_classes/renderable.hpp>
 
 #include <string>
 
@@ -33,4 +33,4 @@ protected:
 
 } // namespace bges
 
-#endif //BGES_LABEL_HPP
+#endif //BGES_END_NODES_LABEL_HPP

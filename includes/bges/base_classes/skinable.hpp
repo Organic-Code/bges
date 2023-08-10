@@ -1,5 +1,5 @@
-#ifndef BGES_SKINABLE_HPP
-#define BGES_SKINABLE_HPP
+#ifndef BGES_BASE_CLASSES_SKINABLE_HPP
+#define BGES_BASE_CLASSES_SKINABLE_HPP
 
 #include <memory>
 #include <utility>
@@ -20,4 +20,4 @@ protected:
 };
 } // namespace bges
 
-#endif //BGES_SKINABLE_HPP
+#endif //BGES_BASE_CLASSES_SKINABLE_HPP

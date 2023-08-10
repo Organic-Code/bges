@@ -9,7 +9,7 @@
 #include <bges/base_classes/skinable.hpp>
 #include <bges/colors.hpp>
 
-#include <bges/label.hpp>
+#include <bges/end_nodes/label.hpp>
 
 namespace bges {
 

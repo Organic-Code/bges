@@ -1,7 +1,7 @@
+#include <bges/end_nodes/label.hpp>
 #include <bges/containers/unmanaged.hpp>
 #include <bges/scene.hpp>
 #include <bges/shapes.hpp>
-#include <bges/label.hpp>
 #include <bges/window.hpp>
 
 #include <cassert>
