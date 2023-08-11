@@ -21,6 +21,8 @@ public:
 		static void mouse_press(Scene&, const event::MousePress& ev);
 		static void mouse_release(Scene&, const event::MouseRelease& ev);
 		static void mouse_scroll(Scene&, const event::MouseScroll& ev);
+		static void mouse_enter(Scene&, const event::MouseEnter& ev);
+		static void mouse_exit(Scene&, const event::MouseExit& ev);
 
 		friend class Window;
 	};
@@ -54,6 +56,8 @@ private:
     void mouse_press(const event::MousePress&);
     void mouse_release(const event::MouseRelease&);
     void mouse_scroll(const event::MouseScroll&);
+    void mouse_enter(const event::MouseEnter&);
+    void mouse_exit(const event::MouseExit&);
 
     std::shared_ptr<Parent> m_root;
     bool m_hidden{false};

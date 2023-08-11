@@ -93,6 +93,10 @@ public:
 		static void set_parent(Renderable& r, Parent* p) noexcept {
 			r.set_parent(p);
 		}
+		static void set_pos(Renderable& r, PointF p) noexcept {
+			r.set_pos(p);
+		}
+
 		friend class Scene;
 		friend class Parent;
 		friend class Button; // todo : ne pas ajouter le bouton juste comme ça (sert actuellement pour faire le rendu du label)
@@ -101,6 +105,8 @@ public:
 protected:
 	virtual void vrender(Scene&, const PointF& relative_to) noexcept = 0;
 	virtual void set_parent(Parent*) noexcept;
+
+	virtual void set_pos(PointF p) noexcept;
 
     bool p_hidden{false};
 	PointF p_pos{};

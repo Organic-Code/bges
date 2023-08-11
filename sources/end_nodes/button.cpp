@@ -66,11 +66,17 @@ void bges::Button::set_parent(Parent *p) noexcept {
 		m_mouse_move_id = p_parent->on_mouse_move([this](Parent &p, const event::MouseMove &ev) {
 			mouse_moved(p, ev);
 		});
-		m_mouse_move_id = p_parent->on_mouse_press([this](Parent &p, const event::MousePress &ev) {
+		m_mouse_press_id = p_parent->on_mouse_press([this](Parent &p, const event::MousePress &ev) {
 			mouse_press(p, ev);
 		});
-		m_mouse_move_id = p_parent->on_mouse_release([this](Parent &p, const event::MouseRelease &ev) {
+		m_mouse_release_id = p_parent->on_mouse_release([this](Parent &p, const event::MouseRelease &ev) {
 			mouse_release(p, ev);
+		});
+		m_mouse_exit_id = p_parent->on_mouse_exit([this](Parent &p, const event::MouseExit &ev) {
+            mouse_moved(p, {ev.x, ev.y});
+        });
+		m_mouse_enter_id = p_parent->on_mouse_enter([this](Parent& p, const event::MouseEnter &ev) {
+            mouse_moved(p, {ev.x, ev.y});
 		});
 	}
 	else {
@@ -78,6 +84,8 @@ void bges::Button::set_parent(Parent *p) noexcept {
 		p_parent->remove_mouse_move_listener(m_mouse_move_id);
 		p_parent->remove_mouse_press_listener(m_mouse_press_id);
 		p_parent->remove_mouse_release_listener(m_mouse_release_id);
+		p_parent->remove_mouse_exit_listener(m_mouse_exit_id);
+		p_parent->remove_mouse_enter_listener(m_mouse_enter_id);
 		p_parent = nullptr;
 	}
 }

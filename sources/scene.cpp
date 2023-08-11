@@ -32,6 +32,12 @@ void bges::Scene::Attorney::mouse_release(Scene &sc, const event::MouseRelease &
 void bges::Scene::Attorney::mouse_scroll(Scene &sc, const event::MouseScroll &ev) {
 	sc.mouse_scroll(ev);
 }
+void bges::Scene::Attorney::mouse_enter(Scene &sc, const event::MouseEnter& ev) {
+	sc.mouse_enter(ev);
+}
+void bges::Scene::Attorney::mouse_exit(Scene &sc, const event::MouseExit& ev) {
+	sc.mouse_exit(ev);
+}
 
 std::shared_ptr<bges::Scene> bges::Scene::create() {
 	std::shared_ptr<Scene> scene {new Scene};
@@ -122,3 +128,10 @@ void bges::Scene::mouse_release(const event::MouseRelease &ev) {
 void bges::Scene::mouse_scroll(const event::MouseScroll &ev) {
 	fire_mouse_scroll(*this, ev);
 }
+void bges::Scene::mouse_enter(const event::MouseEnter &ev) {
+	fire_mouse_enter(*this, ev);
+}
+void bges::Scene::mouse_exit(const event::MouseExit &ev) {
+	fire_mouse_exit(*this, ev);
+}
+

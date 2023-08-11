@@ -71,6 +71,10 @@ void bges::Renderable::to_back() noexcept {
 }
 
 void bges::Renderable::set_parent(Parent * p) noexcept {
-    assert(p_parent == nullptr || p == nullptr);
+    assert((p_parent == nullptr || p == nullptr) && "Only one parent at a time");
 	p_parent = p;
+}
+
+void bges::Renderable::set_pos(bges::PointF p) noexcept {
+	p_pos = p;
 }

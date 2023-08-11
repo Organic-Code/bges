@@ -165,6 +165,9 @@ struct MouseScroll: details::MouseBaseEv {
 	ScrollDirection direction;
 };
 
+struct MouseEnter: details::MouseBaseEv { };
+struct MouseExit: details::MouseBaseEv { };
+
 struct KeyPress: details::KeyboardBaseEv { };
 
 struct KeyRelease: details::KeyboardBaseEv { };

@@ -24,19 +24,19 @@ void bges::container::Unmanaged::as_root_of(std::shared_ptr<Scene> sc) noexcept 
 	m_current_scene = sc;
 	if (sc != nullptr) {
 		m_mouse_move_id = sc->on_mouse_move([this](Scene&, const event::MouseMove& ev) {
-            // TODO filtrer : s’exécute même si le curseur est sur un enfant.
+            // TODO filtrer : vérifier la zone avant de lancer l’évenement ; rajouter aussi sur set_parent
 			fire_mouse_move(*this, ev);
 		});
 		m_mouse_press_id = sc->on_mouse_press([this](Scene&, const event::MousePress& ev) {
-            // TODO filtrer : s’exécute même si le curseur est sur un enfant.
+            // TODO filtrer : vérifier la zone avant de lancer l’évenement ; rajouter aussi sur set_parent
 			fire_mouse_press(*this, ev);
 		});
 		m_mouse_release_id = sc->on_mouse_release([this](Scene&, const event::MouseRelease& ev) {
-			// TODO filtrer : s’exécute même si le curseur est sur un enfant.
+			// TODO filtrer : vérifier la zone avant de lancer l’évenement ; rajouter aussi sur set_parent
 			fire_mouse_release(*this, ev);
 		});
 		m_mouse_scroll_id = sc->on_mouse_scroll([this](Scene&, const event::MouseScroll& ev) {
-            // TODO filtrer : s’exécute même si le curseur est sur un enfant.
+            // TODO filtrer : vérifier la zone avant de lancer l’évenement ; rajouter aussi sur set_parent
 			fire_mouse_scroll(*this, ev);
 		});
 	}

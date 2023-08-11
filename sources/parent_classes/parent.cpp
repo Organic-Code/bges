@@ -22,6 +22,7 @@ const std::vector<bges::Parent::child_type> &bges::Parent::children() const noex
 }
 
 void bges::Parent::add_child(child_type c) {
+	assert(std::find(p_children.begin(), p_children.end(), c) == p_children.end() && "Cannot add the same child multiple times");
 	Renderable::Attorney::set_parent(*c, this);
 	p_children.emplace_back(std::move(c));
 }
@@ -63,6 +64,10 @@ void bges::Parent::bring_to_back(const child_type::element_type *r) noexcept {
 }
 void bges::Parent::bring_to_back(const std::shared_ptr<Renderable>& r) noexcept {
 	bring_to_back(r.get());
+}
+
+void bges::Parent::set_child_pos(std::vector<child_type>::size_type idx, const bges::PointF &pos) noexcept {
+	Renderable::Attorney::set_pos(*p_children[idx], pos);
 }
 
 void bges::Parent::render_child(Scene& sc, std::vector<child_type>::size_type idx, const PointF& relative_to) noexcept {

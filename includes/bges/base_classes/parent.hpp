@@ -41,13 +41,13 @@ public:
 	/**
 	 * @param c Child to bring to the front of the render list (will be printed above others)
 	 */
-    void bring_to_front(const child_type::element_type * c) noexcept;
+    virtual void bring_to_front(const child_type::element_type * c) noexcept;
 	void bring_to_front(const child_type& c) noexcept;
 
 	/**
 	 * @param c Child to bring to the back of the render list (will be printed below others)
 	 */
-    void bring_to_back(const child_type::element_type * c) noexcept;
+    virtual void bring_to_back(const child_type::element_type * c) noexcept;
     void bring_to_back(const child_type&) noexcept;
 
 	/**
@@ -61,6 +61,8 @@ public:
 	};
 
 protected:
+	void set_child_pos(std::vector<child_type>::size_type idx, const PointF& pos) noexcept;
+
 	virtual void as_root_of(std::shared_ptr<Scene>) = 0;
     void render_child(Scene&, std::vector<child_type>::size_type idx, const PointF& relative_to) noexcept;
     std::vector<child_type> p_children;

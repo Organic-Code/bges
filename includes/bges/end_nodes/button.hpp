@@ -34,7 +34,6 @@ public:
 	explicit Button(std::string label) : m_text(std::move(label)) {
 		p_skin = std::make_shared<default_skin>();
 		p_size = {100, 30}; // TODO temporaire
-		p_pos = {10, 500}; // TODO temporaire
 	}
 
 	void set_text(std::string text) noexcept {
@@ -66,6 +65,9 @@ private:
 	std::size_t m_mouse_move_id{0};
 	std::size_t m_mouse_press_id{0};
 	std::size_t m_mouse_release_id{0};
+	std::size_t m_mouse_enter_id{0};
+	std::size_t m_mouse_exit_id{0};
+
 	bool m_mouse_pressed{false};
 	std::string m_text{};
 	State m_state{State::base};

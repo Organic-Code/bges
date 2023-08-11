@@ -15,6 +15,8 @@ struct MouseMove;
 struct MousePress;
 struct MouseRelease;
 struct MouseScroll;
+struct MouseEnter;
+struct MouseExit;
 struct KeyPress;
 struct KeyRelease;
 struct CloseRequest;
@@ -80,6 +82,8 @@ BGES_EVENT_PUBLISHER(MouseMove, mouse_move)                      // Mouse being 
 BGES_EVENT_PUBLISHER(MousePress, mouse_press)                    // Mouse button being pressed (left, right, middle, others)
 BGES_EVENT_PUBLISHER(MouseRelease, mouse_release)                // Mouse button being released
 BGES_EVENT_PUBLISHER(MouseScroll, mouse_scroll)                  // Mouse wheel scrolled
+BGES_EVENT_PUBLISHER(MouseExit, mouse_exit)                      // Mouse exited Window or GUI element
+BGES_EVENT_PUBLISHER(MouseEnter, mouse_enter)                    // Mouse entered Window or GUI element
 BGES_EVENT_PUBLISHER(KeyPress, key_press)                        // Keyboard pressed
 BGES_EVENT_PUBLISHER(KeyRelease, key_release)                    // Keyboard released
 BGES_EVENT_PUBLISHER(CloseRequest, close_request)                // Window close request (eg : click on the top right cross)
@@ -91,13 +95,13 @@ BGES_EVENT_PUBLISHER(DataUpdate, data_update)                    // GUI data ele
 BGES_EVENT_PUBLISHER(AtomicTextUpdate, atomic_text_update)       // GUI text updated, called for every letter
 
 template <typename Source>
-class MouseEvents: public MouseMove<Source>, public MousePress<Source>, public MouseRelease<Source>, public MouseScroll<Source> { };
+struct MouseEvents: MouseMove<Source>, MousePress<Source>, MouseRelease<Source>, MouseScroll<Source>, MouseEnter<Source>, MouseExit<Source> { };
 
 template <typename Source>
-class KeyboardEvents: public KeyPress<Source>, public KeyRelease<Source> { };
+struct KeyboardEvents: KeyPress<Source>, KeyRelease<Source> { };
 
 template <typename Source>
-class WindowEvents: public CloseRequest<Source>, public FocusLose<Source>, public FocusGain<Source>, public Resize<Source> { };
+struct WindowEvents: CloseRequest<Source>, FocusLose<Source>, FocusGain<Source>, Resize<Source> { };
 
 } // namespace bges::event_publisher
 
