@@ -12,29 +12,19 @@ constexpr bges::IColor canceled_color = {200, 100, 100, 255};
 constexpr bges::IColor default_color = {200, 200, 200, 255};
 } // namespace
 
-void bges::Button::mouse_moved(Parent & /*unused*/, const event::MouseMove &ev) noexcept {
-	if (ev.x >= p_pos.x && ev.y >= p_pos.y && ev.x <= (p_pos.x + p_size.width)
-	    && ev.y <= (p_pos.y + p_size.height)) { // Todo: this test should be a filtered event.
-
-		if (m_mouse_pressed) {
-			m_state = State::pressed;
-		}
-		else {
-			m_state = State::hovered;
-		}
-	}
-	else {
-		if (m_mouse_pressed) {
-			m_state = State::pressed;
-		}
-		else {
-			if (m_state != State::canceled) {
-				m_state = State::base;
-			}
-		}
+void bges::Button::mouse_exited(const event::MouseExit& ev) {
+	if (!m_mouse_pressed) {
+		m_state = State::base;
 	}
 }
-void bges::Button::mouse_press(Parent & /*unused*/, const event::MousePress &ev) noexcept {
+
+void bges::Button::mouse_entered(const event::MouseEnter& ev) {
+	if (!m_mouse_pressed) {
+		m_state = State::hovered;
+	}
+}
+
+void bges::Button::mouse_pressed(const event::MousePress &ev) {
 	if (ev.x >= p_pos.x && ev.y >= p_pos.y) {
 		m_mouse_pressed = ev.x <= (p_pos.x + p_size.width) && ev.y <= (p_pos.y + p_size.height);
 		if (m_mouse_pressed) {
@@ -42,10 +32,11 @@ void bges::Button::mouse_press(Parent & /*unused*/, const event::MousePress &ev)
 		}
 	}
 }
-void bges::Button::mouse_release(Parent &, const event::MouseRelease &ev) noexcept {
+
+void bges::Button::mouse_release(const event::MouseRelease &ev) {
 	if (m_mouse_pressed) {
 		if (ev.x >= p_pos.x && ev.y >= p_pos.y && ev.x <= (p_pos.x + p_size.width) && ev.y <= (p_pos.y + p_size.height)) {
-			fire_click(*this, {});
+			fire_click(*this, {ev.button});
 			m_state = State::clicked;
 		}
 		else {
@@ -53,41 +44,34 @@ void bges::Button::mouse_release(Parent &, const event::MouseRelease &ev) noexce
 		}
 		m_mouse_pressed = false;
 	}
+	m_mouse_released = false;
 }
 
 void bges::Button::vrender(Scene &sc, const PointF &relative_to) noexcept {
+	if (m_mouse_pressed && m_mouse_released) { /* If mouse was pressed on the button (info from parent), but released outside of it (info from scene)*/
+		m_mouse_pressed = false;
+		m_mouse_released = false;
+		m_state = State::canceled;
+	}
+
 	p_skin->render(sc, {p_pos, relative_to, p_size, m_state, m_text});
 }
 
 void bges::Button::set_parent(Parent *p) noexcept {
-	if (p != nullptr) {
-		assert(p_parent == nullptr);
-		p_parent        = p;
-		m_mouse_move_id = p_parent->on_mouse_move([this](Parent &p, const event::MouseMove &ev) {
-			mouse_moved(p, ev);
+}
+
+void bges::Button::set_scene(const std::shared_ptr<Scene>& scene) {
+	if (scene != nullptr) {
+		m_mouse_release_id = scene->on_mouse_release([this](Scene &, const event::MouseRelease &ev) {
+			if (m_mouse_pressed) {
+				m_mouse_released = true;
+			}
 		});
-		m_mouse_press_id = p_parent->on_mouse_press([this](Parent &p, const event::MousePress &ev) {
-			mouse_press(p, ev);
-		});
-		m_mouse_release_id = p_parent->on_mouse_release([this](Parent &p, const event::MouseRelease &ev) {
-			mouse_release(p, ev);
-		});
-		m_mouse_exit_id = p_parent->on_mouse_exit([this](Parent &p, const event::MouseExit &ev) {
-            mouse_moved(p, {ev.x, ev.y});
-        });
-		m_mouse_enter_id = p_parent->on_mouse_enter([this](Parent& p, const event::MouseEnter &ev) {
-            mouse_moved(p, {ev.x, ev.y});
-		});
+
+	} else if (auto my_scene = p_scene.lock() ; my_scene != nullptr) {
+		my_scene->remove_mouse_release_listener(m_mouse_release_id);
 	}
-	else {
-		assert(p_parent != nullptr);
-		p_parent->remove_mouse_move_listener(m_mouse_move_id);
-		p_parent->remove_mouse_press_listener(m_mouse_press_id);
-		p_parent->remove_mouse_release_listener(m_mouse_release_id);
-		p_parent->remove_mouse_exit_listener(m_mouse_exit_id);
-		p_parent->remove_mouse_enter_listener(m_mouse_enter_id);
-		p_parent = nullptr;
-	}
+    p_scene = scene;
 }
 
 void bges::Button::default_skin::render(bges::Scene &sce, const bges::Button::SkinData &data) noexcept {

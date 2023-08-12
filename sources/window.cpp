@@ -116,7 +116,7 @@ void bges::Window::render() noexcept {
 				break;
 			}
 			case bges_ffi::event_type::MOUSE_SCROLL: {
-				bges::event::MouseScroll ev{};
+				std::optional<bges::event::MouseScroll> ev;
 				if (it->mouse_scroll.horizontal_scroll) {
 					ev = {static_cast<float>(it->mouse_scroll.pos.x), static_cast<float>(it->mouse_scroll.pos.y), it->mouse_scroll.delta,
 					      it->mouse_scroll.wheel_id, it->mouse_scroll.upwards ? ScrollDirection::left : ScrollDirection::right};
@@ -125,8 +125,8 @@ void bges::Window::render() noexcept {
 					ev = {static_cast<float>(it->mouse_scroll.pos.x), static_cast<float>(it->mouse_scroll.pos.y), it->mouse_scroll.delta,
 					      it->mouse_scroll.wheel_id, it->mouse_scroll.upwards ? ScrollDirection::up : ScrollDirection::down};
 				}
-				fire_mouse_scroll(*this, ev);
-				Scene::Attorney::mouse_scroll(*m_scenes[0], ev); // TODO
+				fire_mouse_scroll(*this, *ev);
+				Scene::Attorney::mouse_scroll(*m_scenes[0], *ev); // TODO
 			} break;
 			case bges_ffi::event_type::RESIZE:
 				fire_resize(*this, bges::event::Resize{it->window_size.width, it->window_size.height});

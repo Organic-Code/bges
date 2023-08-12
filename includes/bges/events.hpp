@@ -132,11 +132,21 @@ enum class Key {
 
 namespace bges::event {
 namespace details {
-	struct MouseBaseEv {
+	struct EventBase {
+		void consume() const noexcept { consumed = true; }
+		bool is_consumed() const noexcept { return consumed; }
+	private:
+		mutable bool consumed{false};
+	};
+	struct MouseBaseEv : EventBase {
+		MouseBaseEv(float x, float y) noexcept : x{x}, y{y} { }
+
 		float x; // <! x coordinate relative to child
 		float y; // <! y coordinate relative to child
 	};
-	struct KeyboardBaseEv {
+	struct KeyboardBaseEv : EventBase {
+		KeyboardBaseEv(std::uint16_t backend_key_code, Key key,	bool is_meta_pressed, bool is_shift_pressed, bool is_caps_pressed, bool is_alt_pressed, bool is_ctrl_pressed) noexcept
+		    : backend_key_code{backend_key_code}, key{key}, is_meta_pressed{is_meta_pressed}, is_shift_pressed{is_shift_pressed}, is_caps_pressed{is_caps_pressed}, is_alt_pressed{is_alt_pressed}, is_ctrl_pressed{is_ctrl_pressed} { }
 		std::uint16_t backend_key_code;
 		Key key;
 		bool is_meta_pressed;
@@ -147,49 +157,84 @@ namespace details {
 	};
 } // namespace details
 
-struct MouseMove: details::MouseBaseEv { };
+struct MouseMove: details::MouseBaseEv {
+	MouseMove(float x, float y) noexcept : details::MouseBaseEv{x, y} { }
+};
 
 struct MousePress: details::MouseBaseEv {
+	MousePress(float x, float y, MouseButton button, std::uint8_t code) noexcept
+	    : details::MouseBaseEv{x, y}, button{button}, backend_code{code} { }
+
 	MouseButton button;
 	std::uint8_t backend_code;
 };
 
 struct MouseRelease: details::MouseBaseEv {
+	MouseRelease(float x, float y, MouseButton button, std::uint8_t code) noexcept
+	    : details::MouseBaseEv{x, y}, button{button}, backend_code{code} { }
+
 	MouseButton button;
 	std::uint8_t backend_code;
 };
 
 struct MouseScroll: details::MouseBaseEv {
+	MouseScroll(float x, float y, std::uint8_t delta, std::uint8_t wheel, ScrollDirection dir) noexcept
+	    : details::MouseBaseEv{x, y}, delta{delta}, backend_wheel_id{wheel}, direction{dir} { }
+
 	std::uint8_t delta;
 	std::uint8_t backend_wheel_id;
 	ScrollDirection direction;
 };
 
-struct MouseEnter: details::MouseBaseEv { };
-struct MouseExit: details::MouseBaseEv { };
+struct MouseEnter: details::MouseBaseEv {
+	MouseEnter(float x, float y) noexcept : details::MouseBaseEv{x, y} { }
+};
 
-struct KeyPress: details::KeyboardBaseEv { };
+struct MouseExit: details::MouseBaseEv {
+	MouseExit(float x, float y) noexcept : details::MouseBaseEv{x, y} { }
+};
 
-struct KeyRelease: details::KeyboardBaseEv { };
+struct KeyPress: details::KeyboardBaseEv {
+	KeyPress(std::uint16_t backend_key_code, Key key,	bool is_meta_pressed, bool is_shift_pressed, bool is_caps_pressed, bool is_alt_pressed, bool is_ctrl_pressed) noexcept
+			: details::KeyboardBaseEv{backend_key_code, key, is_meta_pressed, is_shift_pressed, is_caps_pressed, is_alt_pressed, is_ctrl_pressed} { }
+};
 
-struct Resize {
+struct KeyRelease: details::KeyboardBaseEv {
+	KeyRelease(std::uint16_t backend_key_code, Key key,	bool is_meta_pressed, bool is_shift_pressed, bool is_caps_pressed, bool is_alt_pressed, bool is_ctrl_pressed) noexcept
+		: details::KeyboardBaseEv{backend_key_code, key, is_meta_pressed, is_shift_pressed, is_caps_pressed, is_alt_pressed, is_ctrl_pressed} { }
+};
+
+struct Resize : details::EventBase {
+	Resize(unsigned int width, unsigned int height) noexcept : width{width}, height{height} { }
+
 	unsigned int width;
 	unsigned int height;
 };
 
-struct CloseRequest { };
+struct CloseRequest : details::EventBase {
+	CloseRequest() noexcept = default;
+};
 
-struct FocusLose { };
+struct FocusLose : details::EventBase {
+	FocusLose() noexcept = default;
+};
 
-struct FocusGain { };
+struct FocusGain : details::EventBase {
+	FocusGain() noexcept = default;
+};
 
-struct Click {
+struct Click : details::EventBase {
+	Click(MouseButton button) noexcept : button{button} { }
 	MouseButton button;
 };
 
-struct DataUpdate { };
+struct DataUpdate : details::EventBase {
+	DataUpdate() noexcept = default;
+};
 
-struct AtomicTextUpdate {
+struct AtomicTextUpdate : details::EventBase {
+	AtomicTextUpdate(std::size_t update_index) noexcept : update_index{update_index} { }
+
 	std::size_t update_index; // index at which the text has been updated
 };
 } // namespace bges::event

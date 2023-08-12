@@ -78,7 +78,7 @@ void bges::container::VBox::vrender(Scene &scene, const PointF& relative_to) noe
 
 	for (unsigned int i = 0 ; i < p_children.size() ; ++i) {
 
-		set_child_pos(i, pos);
+		child_set_pos(i, pos);
 		render_child(scene, i, relative_to);
 		pos.y += p_children[i]->get_displayed_size().height + m_vspacing;
 

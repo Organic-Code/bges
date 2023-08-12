@@ -4,6 +4,17 @@
 #include <vector>
 
 namespace {
+std::size_t find_child(const std::vector<std::shared_ptr<bges::Renderable>>& children, const bges::PointF& point) {
+	for (unsigned int i = children.size() ; i--;) { // starting with the lastly rendered one
+		if (children[i]->is_within(point)) {
+			return i;
+		}
+	}
+	return std::numeric_limits<std::size_t>::max();
+}
+}
+
+namespace {
 struct ptr_comp {
 	const bges::Renderable *renderable;
 
@@ -17,6 +28,13 @@ struct ptr_comp {
 };
 } // namespace
 
+
+bges::Parent::~Parent() {
+	for (auto &child : p_children) {
+		Renderable::Attorney::set_parent(*child, nullptr);
+	}
+}
+
 const std::vector<bges::Parent::child_type> &bges::Parent::children() const noexcept {
 	return p_children;
 }
@@ -25,6 +43,11 @@ void bges::Parent::add_child(child_type c) {
 	assert(std::find(p_children.begin(), p_children.end(), c) == p_children.end() && "Cannot add the same child multiple times");
 	Renderable::Attorney::set_parent(*c, this);
 	p_children.emplace_back(std::move(c));
+
+	auto scene = p_scene.lock();
+	if (scene != nullptr) {
+		Renderable::Attorney::set_scene(*p_children.back(), scene);
+	}
 }
 
 void bges::Parent::remove_child(const child_type &child) {
@@ -66,10 +89,50 @@ void bges::Parent::bring_to_back(const std::shared_ptr<Renderable>& r) noexcept 
 	bring_to_back(r.get());
 }
 
-void bges::Parent::set_child_pos(std::vector<child_type>::size_type idx, const bges::PointF &pos) noexcept {
-	Renderable::Attorney::set_pos(*p_children[idx], pos);
-}
-
 void bges::Parent::render_child(Scene& sc, std::vector<child_type>::size_type idx, const PointF& relative_to) noexcept {
 	Renderable::Attorney::render(*p_children[idx], sc, relative_to);
+}
+
+
+void bges::Parent::mouse_moved_within(const event::MouseMove& ev) {
+	auto selected = find_child(p_children, {ev.x, ev.y});
+	if (selected == p_hovered_child && selected != std::numeric_limits<std::size_t>::max()) {
+		child_mouse_moved_within(selected, ev);
+	} else {
+		if (p_hovered_child != std::numeric_limits<std::size_t>::max()) {
+			child_mouse_exited(p_hovered_child, {ev.x, ev.y});
+			p_hovered_child = std::numeric_limits<std::size_t>::max();
+		}
+		if (selected != std::numeric_limits<std::size_t>::max()) {
+			p_hovered_child = selected;
+			child_mouse_entered(selected, {ev.x, ev.y});
+		}
+	}
+}
+
+void bges::Parent::mouse_exited(const event::MouseExit& ev) {
+	if (p_hovered_child != std::numeric_limits<std::size_t>::max()) {
+		child_mouse_exited(p_hovered_child, ev);
+	}
+	p_hovered_child = std::numeric_limits<std::size_t>::max();
+}
+
+void bges::Parent::mouse_entered(const event::MouseEnter& ev) {
+	auto selected = find_child(p_children, {ev.x, ev.y});
+	if (selected != std::numeric_limits<std::size_t>::max()) {
+		p_hovered_child = selected;
+		child_mouse_entered(selected, ev);
+	}
+}
+
+void bges::Parent::mouse_pressed(const event::MousePress& ev) {
+	if (p_hovered_child != std::numeric_limits<std::size_t>::max()) {
+		child_mouse_pressed(p_hovered_child, ev);
+	}
+}
+
+void bges::Parent::mouse_release(const event::MouseRelease& ev) {
+	if (p_hovered_child != std::numeric_limits<std::size_t>::max()) {
+		child_mouse_release(p_hovered_child, ev);
+	}
 }

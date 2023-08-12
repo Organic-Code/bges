@@ -56,6 +56,7 @@ void bges::Scene::set_root(const std::shared_ptr<Scene>& this_scene, std::shared
 	}
 	this_scene->m_root = std::move(new_root);
 	Parent::Attorney::as_root_of(*this_scene->m_root, this_scene);
+	Renderable::Attorney::set_scene(*this_scene->m_root, this_scene);
 }
 
 const bges::Viewport &bges::Scene::get_viewport() const noexcept {
@@ -118,20 +119,25 @@ void bges::Scene::render() noexcept {
 
 void bges::Scene::mouse_move(const event::MouseMove &ev) {
 	fire_mouse_move(*this, ev);
+	Renderable::Attorney::mouse_moved_within(*m_root, ev);
 }
 void bges::Scene::mouse_press(const event::MousePress &ev) {
 	fire_mouse_press(*this, ev);
+	Renderable::Attorney::mouse_pressed(*m_root, ev);
 }
 void bges::Scene::mouse_release(const event::MouseRelease &ev) {
 	fire_mouse_release(*this, ev);
+	Renderable::Attorney::mouse_release(*m_root, ev);
 }
 void bges::Scene::mouse_scroll(const event::MouseScroll &ev) {
 	fire_mouse_scroll(*this, ev);
 }
 void bges::Scene::mouse_enter(const event::MouseEnter &ev) {
 	fire_mouse_enter(*this, ev);
+	Renderable::Attorney::mouse_entered(*m_root, ev);
 }
 void bges::Scene::mouse_exit(const event::MouseExit &ev) {
 	fire_mouse_exit(*this, ev);
+	Renderable::Attorney::mouse_exited(*m_root, ev);
 }
 

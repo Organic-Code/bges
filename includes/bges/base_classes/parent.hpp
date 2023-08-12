@@ -23,6 +23,8 @@ public:
 
 	using child_type = std::shared_ptr<Renderable>;
 
+	virtual ~Parent();
+
 	/**
 	 * @return The current children list
 	 */
@@ -55,18 +57,56 @@ public:
 	 */
 	struct Attorney {
 		static void as_root_of(Parent& p, std::shared_ptr<Scene> scene) {
-			p.as_root_of(scene);
+			p.as_root_of(std::move(scene));
 		}
 		friend class Scene;
 	};
 
 protected:
-	void set_child_pos(std::vector<child_type>::size_type idx, const PointF& pos) noexcept;
+	/**
+	 * Attoney enablers
+	 */
+	void child_set_pos(std::vector<child_type>::size_type idx, const PointF& pos) noexcept {
+		Renderable::Attorney::set_pos(*p_children[idx], pos);
+	}
+	void child_set_scene(std::vector<child_type>::size_type idx, const std::shared_ptr<Scene>& scene) {
+		Renderable::Attorney::set_scene(*p_children[idx], scene);
+	}
+	void child_mouse_moved_within(std::vector<child_type>::size_type idx, const event::MouseMove& ev) noexcept {
+		Renderable::Attorney::mouse_moved_within(*p_children[idx], ev);
+	}
+	void child_mouse_exited(std::vector<child_type>::size_type idx, const event::MouseExit& ev) noexcept {
+		Renderable::Attorney::mouse_exited(*p_children[idx], ev);
+	}
+	void child_mouse_entered(std::vector<child_type>::size_type idx, const event::MouseEnter& ev) noexcept {
+		Renderable::Attorney::mouse_entered(*p_children[idx], ev);
+	}
+	void child_mouse_pressed(std::vector<child_type>::size_type idx, const event::MousePress& ev) noexcept {
+		Renderable::Attorney::mouse_pressed(*p_children[idx], ev);
+	}
+	void child_mouse_release(std::vector<child_type>::size_type idx, const event::MouseRelease& ev) noexcept {
+		Renderable::Attorney::mouse_release(*p_children[idx], ev);
+	}
+
+	void set_scene(const std::shared_ptr<Scene>& scene) override {
+		p_scene = scene;
+		for (auto i = 0u; i < p_children.size(); ++i) {
+			child_set_scene(i, scene);
+		}
+	}
+
 
 	virtual void as_root_of(std::shared_ptr<Scene>) = 0;
     void render_child(Scene&, std::vector<child_type>::size_type idx, const PointF& relative_to) noexcept;
-    std::vector<child_type> p_children;
 
+	void mouse_moved_within(const event::MouseMove& ev) override;
+	void mouse_exited(const event::MouseExit& ev) override;
+	void mouse_entered(const event::MouseEnter& ev) override;
+	void mouse_pressed(const event::MousePress& ev) override;
+	void mouse_release(const event::MouseRelease& ev) override;
+
+    std::vector<child_type> p_children;
+	std::size_t p_hovered_child{std::numeric_limits<std::size_t>::max()};
 };
 } // namespace bges
 

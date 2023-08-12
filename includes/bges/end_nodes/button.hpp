@@ -40,6 +40,10 @@ public:
 		m_text = std::move(text);
 	}
 
+	~Button() {
+		set_parent(nullptr);
+	}
+
 	// TODO
 
 private:
@@ -53,22 +57,24 @@ private:
 		Label m_label{};
 	};
 
-	void mouse_moved(Parent&, const event::MouseMove&) noexcept;
-	void mouse_press(Parent&, const event::MousePress&) noexcept;
-	void mouse_release(Parent&, const event::MouseRelease&) noexcept;
 
-	void vrender(Scene& sce, const PointF& relative_to) noexcept override;
+	// automatically called by parent
+	void mouse_exited(const event::MouseExit&) override;
+	void mouse_entered(const event::MouseEnter&) override;
+	void mouse_pressed(const event::MousePress&) override;
+	void mouse_release(const event::MouseRelease&) override;
+
+    void vrender(Scene& sce, const PointF& relative_to) noexcept override;
     void set_parent(Parent*) noexcept override;
+
+	void set_scene(const std::shared_ptr<Scene>& scene) override;
 
 	bges::IColor m_color{200, 200, 200, 255};
 
-	std::size_t m_mouse_move_id{0};
-	std::size_t m_mouse_press_id{0};
 	std::size_t m_mouse_release_id{0};
-	std::size_t m_mouse_enter_id{0};
-	std::size_t m_mouse_exit_id{0};
 
-	bool m_mouse_pressed{false};
+	bool m_mouse_pressed{false};  // true if mouse is pressed on the button, info from parent
+	bool m_mouse_released{false}; // true if mouse was released, info from scene
 	std::string m_text{};
 	State m_state{State::base};
 };

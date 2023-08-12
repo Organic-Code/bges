@@ -5,10 +5,19 @@
 #include <bges/geometry.hpp>
 
 #include <cassert>
+#include <memory>
 
 namespace bges {
 class Scene;
 class Parent;
+namespace event {
+struct MouseMove;
+struct MousePress;
+struct MouseRelease;
+struct MouseScroll;
+struct MouseEnter;
+struct MouseExit;
+}
 
 /**
  * The renderable class is the base class for all GUI elements that ought to be rendered to the screen, including parents that render their children
@@ -86,6 +95,10 @@ public:
     void to_front() noexcept;
     void to_back() noexcept;
 
+	bool is_within(const PointF& point) const noexcept {
+		return point.x >= p_pos.x && point.x <= p_pos.x + p_size.width && point.y >= p_pos.y && point.y <= p_pos.y + p_size.height;
+	}
+
 	class Attorney {
 		static void render(Renderable& r, Scene& w, const PointF& relative_to = PointF{0.f,0.f}) noexcept {
 			r.render(w, relative_to);
@@ -95,6 +108,25 @@ public:
 		}
 		static void set_pos(Renderable& r, PointF p) noexcept {
 			r.set_pos(p);
+		}
+		static void set_scene(Renderable& r, const std::shared_ptr<Scene>& scene) noexcept {
+			r.set_scene(scene);
+		}
+
+		static void mouse_moved_within(Renderable& r, const event::MouseMove& ev) {
+			r.mouse_moved_within(ev);
+		}
+		static void mouse_exited(Renderable& r, const event::MouseExit& ev) {
+			r.mouse_exited(ev);
+		}
+		static void mouse_entered(Renderable& r, const event::MouseEnter& ev) {
+			r.mouse_entered(ev);
+		}
+		static void mouse_pressed(Renderable& r, const event::MousePress& ev) {
+			r.mouse_pressed(ev);
+		}
+		static void mouse_release(Renderable& r, const event::MouseRelease& ev) {
+			r.mouse_release(ev);
 		}
 
 		friend class Scene;
@@ -108,17 +140,30 @@ protected:
 
 	virtual void set_pos(PointF p) noexcept;
 
-    bool p_hidden{false};
+	virtual void set_scene(const std::shared_ptr<Scene>& scene) {
+		p_scene = scene;
+	}
+
+	// methods called by parents on their children, whenever the corresponding action is done within their bound.
+	virtual void mouse_moved_within(const event::MouseMove&) {};
+	virtual void mouse_exited(const event::MouseExit&) {};
+	virtual void mouse_entered(const event::MouseEnter&) {};
+	virtual void mouse_pressed(const event::MousePress&) {};
+	virtual void mouse_release(const event::MouseRelease&) {};
+
+	bool p_hidden{false};
 	PointF p_pos{};
 	SizeF p_size{};
 	Parent* p_parent{nullptr};
 
 	SizeF p_preferred_size{};
 	SizeF p_min_size{};
+
 	SizeF p_max_size{};
 
+	std::weak_ptr<Scene> p_scene;
 private:
-    void render(Scene&, const PointF& relative_to = PointF{0.f, 0.f}) noexcept;
+	void render(Scene&, const PointF& relative_to = PointF{0.f, 0.f}) noexcept;
 };
 }
 
