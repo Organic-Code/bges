@@ -114,7 +114,7 @@ public:
 		}
 
 		static void mouse_moved_within(Renderable& r, const event::MouseMove& ev) {
-			r.mouse_moved_within(ev);
+			r.mouse_moved(ev);
 		}
 		static void mouse_exited(Renderable& r, const event::MouseExit& ev) {
 			r.mouse_exited(ev);
@@ -145,7 +145,7 @@ protected:
 	}
 
 	// methods called by parents on their children, whenever the corresponding action is done within their bound.
-	virtual void mouse_moved_within(const event::MouseMove&) {};
+	virtual void mouse_moved(const event::MouseMove&) {};
 	virtual void mouse_exited(const event::MouseExit&) {};
 	virtual void mouse_entered(const event::MouseEnter&) {};
 	virtual void mouse_pressed(const event::MousePress&) {};

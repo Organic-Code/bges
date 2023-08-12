@@ -126,6 +126,7 @@ BGES_EVENT_PUBLISHER(FocusLose, focus_lose)                      // Window or GU
 BGES_EVENT_PUBLISHER(FocusGain, focus_gain)                      // Window or GUI element focus gained
 BGES_EVENT_PUBLISHER(Resize, resize)                             // Window resized
 BGES_EVENT_PUBLISHER(Click, click)                               // "Click" event (Mouse press + mouse release on the same gui element)
+BGES_EVENT_PUBLISHER(ValueUpdateFloat, value_update_float)       // GUI data element updated, float value (eg : slider)
 BGES_EVENT_PUBLISHER(DataUpdate, data_update)                    // GUI data element updated (eg : text or color being changed. For text : called when action is completed [eg : text field focus is lost after typing])
 BGES_EVENT_PUBLISHER(AtomicTextUpdate, atomic_text_update)       // GUI text updated, called for every letter
 

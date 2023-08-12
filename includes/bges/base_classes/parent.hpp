@@ -99,7 +99,7 @@ protected:
 	virtual void as_root_of(std::shared_ptr<Scene>) = 0;
     void render_child(Scene&, std::vector<child_type>::size_type idx, const PointF& relative_to) noexcept;
 
-	void mouse_moved_within(const event::MouseMove& ev) override;
+	void mouse_moved(const event::MouseMove& ev) override;
 	void mouse_exited(const event::MouseExit& ev) override;
 	void mouse_entered(const event::MouseEnter& ev) override;
 	void mouse_pressed(const event::MousePress& ev) override;

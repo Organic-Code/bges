@@ -40,8 +40,8 @@ public:
 		m_text = std::move(text);
 	}
 
-	~Button() {
-		set_parent(nullptr);
+	~Button() override {
+		Button::set_parent(nullptr);
 	}
 
 	// TODO

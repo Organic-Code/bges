@@ -5,6 +5,7 @@
 #include <bges/containers/hbox.hpp>
 #include <bges/containers/vbox.hpp>
 #include <bges/end_nodes/button.hpp>
+#include <bges/end_nodes/slider.hpp>
 #include <bges/scene.hpp>
 #include <bges/shapes.hpp>
 #include <bges/viewport.hpp>
@@ -104,14 +105,34 @@ SCENARIO("drawing a single rectangle") {
 	auto button4 = std::make_shared<bges::Button>(*button);
 	button4->set_text("Click 4");
 
-	buttons->add_child(button);
 	buttons->add_child(button4);
-	buttons->add_child(button3);
-	buttons->add_child(button2);
+    buttons->add_child(button3);
+    buttons->add_child(button2);
+    buttons->add_child(button);
 
-	button2->to_front();
 
-	scene->get_root()->add_child(buttons);
+	auto sliders = std::make_shared<bges::container::VBox>();
+	auto slider = std::make_shared<bges::Slider>(0., 20.);
+	auto slider2 = std::make_shared<bges::Slider>(20., 100., 20.);
+	sliders->add_child(slider);
+	sliders->add_child(slider2);
+
+    slider->on_value_update_float([buttons](bges::Slider& s, const bges::event::ValueUpdateFloat& f) {
+        buttons->set_spacing(f.value);
+    });
+	slider2->on_value_update_float([slider](bges::Slider& s, const bges::event::ValueUpdateFloat& f) {
+		slider->set_min_max(0., f.value);
+	});
+	sliders->set_spacing(5.f);
+
+    auto hbox = std::make_shared<bges::container::HBox>();
+    hbox->set_margins({5.f, 5.f});
+    hbox->set_spacing(5.f);
+    hbox->add_child(sliders);
+    hbox->add_child(buttons);
+
+
+	scene->get_root()->add_child(hbox);
 
 	srand(std::random_device{}()+time(nullptr));
 	for (int count = 0 ; count < 100 ; ++count) {
@@ -128,6 +149,7 @@ SCENARIO("drawing a single rectangle") {
 	window.add_scene(std::move(scene));
 
 	buttons->to_front();
+	hbox->to_front();
 	while (window.is_open()) {
 
 		window.clear();

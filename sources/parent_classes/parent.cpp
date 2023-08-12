@@ -94,7 +94,7 @@ void bges::Parent::render_child(Scene& sc, std::vector<child_type>::size_type id
 }
 
 
-void bges::Parent::mouse_moved_within(const event::MouseMove& ev) {
+void bges::Parent::mouse_moved(const event::MouseMove& ev) {
 	auto selected = find_child(p_children, {ev.x, ev.y});
 	if (selected == p_hovered_child && selected != std::numeric_limits<std::size_t>::max()) {
 		child_mouse_moved_within(selected, ev);

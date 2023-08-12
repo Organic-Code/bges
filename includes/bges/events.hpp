@@ -232,6 +232,11 @@ struct DataUpdate : details::EventBase {
 	DataUpdate() noexcept = default;
 };
 
+struct ValueUpdateFloat : details::EventBase {
+	ValueUpdateFloat(float f) noexcept : value{f} { }
+	float value;
+};
+
 struct AtomicTextUpdate : details::EventBase {
 	AtomicTextUpdate(std::size_t update_index) noexcept : update_index{update_index} { }
 
